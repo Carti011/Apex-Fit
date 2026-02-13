@@ -7,10 +7,15 @@ function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   useEffect(() => {
-    fetch('/api/v1/status')
+    // Usa a variável de ambiente se existir, senão tenta relativo (fallback)
+    const apiUrl = import.meta.env.VITE_API_URL || '';
+    fetch(`${apiUrl}/api/v1/status`)
       .then(res => res.json())
       .then(data => setStatus('Online 🟢'))
-      .catch(() => setStatus('Offline 🔴'))
+      .catch((err) => {
+        console.error("Erro ao verificar status:", err);
+        setStatus('Offline 🔴');
+      })
   }, [])
 
   return (
