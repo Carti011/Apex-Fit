@@ -1,0 +1,20 @@
+{
+  "name": "apex-fit-monorepo",
+  "version": "1.0.0",
+  "description": "Apex Fit - Monorepo Root",
+  "scripts": {
+    "dev": "npm run services:up && npx concurrently \"npm run backend:dev\" \"npm run frontend:dev\" --names \"BACK,FRONT\" --prefix-colors \"green,blue\"",
+    "services:up": "docker-compose up -d",
+    "services:stop": "docker-compose stop",
+    "services:down": "docker-compose down",
+    "backend:dev": "cd backend && ./mvnw spring-boot:run",
+    "frontend:dev": "cd frontend && npm run dev",
+    "frontend:install": "cd frontend && npm install",
+    "build:frontend": "cd frontend && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "author": "Carti011",
+  "license": "MIT"
+}
