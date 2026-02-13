@@ -10,13 +10,12 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins(
-                        "http://localhost:5173", // Frontend Local (Vite)
-                        "https://carti011.com.br", // Frontend Produção (Vercel)
-                        "https://apex-fit-frontend.vercel.app" // Frontend Default (Vercel)
-                // TODO: Adicionar URLs de Preview da Vercel aqui conforme necessário
+                .allowedOriginPatterns(
+                        "http://localhost:5173", // Frontend Local
+                        "https://*.vercel.app", // Qualquer deploy Vercel (Prod/Preview)
+                        "https://carti011.com.br" // Domínio Personalizado
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "TRACE", "CONNECT")
-                .allowCredentials(true); // Importante para Cookies/Auth no futuro
+                .allowCredentials(true);
     }
 }
