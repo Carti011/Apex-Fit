@@ -4,7 +4,10 @@
   "description": "Apex Fit - Monorepo Root",
   "scripts": {
     "dev": "npm run services:up && npx concurrently \"npm run backend:dev\" \"npm run frontend:dev\" --names \"BACK,FRONT\" --prefix-colors \"green,blue\"",
-    "services:up": "docker-compose up -d",
+    "dev:back": "npm run services:up && npm run backend:dev",
+    "services:up": "docker-compose down && sleep 2 && docker-compose up -d",
+    "stop": "docker-compose stop",
+    "kill": "docker-compose down",
     "services:stop": "docker-compose stop",
     "services:down": "docker-compose down",
     "backend:dev": "cd backend && ./mvnw spring-boot:run",
