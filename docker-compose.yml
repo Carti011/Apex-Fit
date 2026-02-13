@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: apex-fit-db
+    environment:
+      POSTGRES_DB: apexfit_db
+      POSTGRES_USER: apexuser
+      POSTGRES_PASSWORD: apexpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - apex-network
+
+volumes:
+  postgres_data:
+
+networks:
+  apex-network:
+    driver: bridge
