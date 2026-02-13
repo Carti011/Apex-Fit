@@ -48,6 +48,42 @@ npm run dev
 ```
 Acesse a aplicação em `http://localhost:5173`.
 
+## 🛠️ Scripts Úteis (Automação)
+
+Para facilitar o desenvolvimento, este projeto conta com scripts de automação na raiz. Certifique-se de ter o Node.js instalado.
+
+```bash
+# Inicia TODO o ambiente (Docker + Backend + Frontend)
+npm run dev
+
+# Para apenas os serviços (Banco de Dados)
+npm run services:up
+npm run services:stop
+```
+
+## 🚀 Guia de Deploy (Produção)
+
+### 1. Banco de Dados
+Recomendado: **PostgreSQL 16**.
+- **Serviço Sugerido:** Neon (Serverless).
+- **Configuração:** Obtenha a Connection String (ex: `postgres://...`) para uso nas variáveis de ambiente.
+
+### 2. Frontend (Vercel)
+O projeto frontend está localizado na pasta `/frontend`.
+- **Root Directory:** `frontend`
+- **Framework Preset:** Vite
+- **Build Command:** `npm run build`
+- **Output Directory:** `dist`
+- **Install Command:** `npm install`
+
+### 3. Backend (Render / Railway)
+O backend é uma aplicação Java/Spring Boot containerizada via Docker.
+- **Root Directory:** `backend`
+- **Environment Variables Necessárias:**
+  - `DB_URL`: JDBC URL do banco (ex: `jdbc:postgresql://host:port/db?sslmode=require`)
+  - `DB_USERNAME`: Usuário do banco
+  - `DB_PASSWORD`: Senha do banco
+
 ## 📂 Estrutura de Pastas
 
 ```
