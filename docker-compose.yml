@@ -13,6 +13,14 @@ services:
     networks:
       - apex-network
 
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8081:8080
+    networks:
+      - apex-network
+
 volumes:
   postgres_data:
 
