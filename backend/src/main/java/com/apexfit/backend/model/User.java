@@ -1,9 +1,9 @@
 package com.apexfit.backend.model;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import java.time.LocalDateTime;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import java.util.Objects;
 
 @Entity
 @Table(name = "users")
@@ -13,34 +13,33 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "full_name", nullable = false)
-    private String fullName;
+    @NotBlank
+    private String name;
 
-    @Column(nullable = false, unique = true)
+    @Email
+    @NotBlank
+    @Column(unique = true)
     private String email;
 
-    @Column(name = "password_hash", nullable = false)
-    private String passwordHash;
+    @NotBlank
+    private String password;
 
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    // Construtores
     public User() {
     }
 
-    public User(String fullName, String email, String passwordHash) {
-        this.fullName = fullName;
+    public User(Long id, String name, String email, String password) {
+        this.id = id;
+        this.name = name;
         this.email = email;
-        this.passwordHash = passwordHash;
+        this.password = password;
     }
 
-    // Getters e Setters
+    public User(String name, String email, String password) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+    }
+
     public Long getId() {
         return id;
     }
@@ -49,12 +48,12 @@ public class User {
         this.id = id;
     }
 
-    public String getFullName() {
-        return fullName;
+    public String getName() {
+        return name;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getEmail() {
@@ -65,19 +64,36 @@ public class User {
         this.email = email;
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
+    public String getPassword() {
+        return password;
     }
 
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id);
     }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", password='[PROTECTED]'" +
+                '}';
     }
 }

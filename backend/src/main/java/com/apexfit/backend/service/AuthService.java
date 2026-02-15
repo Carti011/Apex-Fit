@@ -1,12 +1,11 @@
 package com.apexfit.backend.service;
 
 import com.apexfit.backend.dto.RegisterDTO;
+import com.apexfit.backend.exception.EmailAlreadyExistsException;
 import com.apexfit.backend.model.User;
 import com.apexfit.backend.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import com.apexfit.backend.exception.EmailAlreadyExistsException;
 
 @Service
 public class AuthService {
@@ -20,12 +19,14 @@ public class AuthService {
     }
 
     public User register(RegisterDTO data) {
-        if (userRepository.existsByEmail(data.email())) {
+        if (userRepository.existsByEmail(data.getEmail())) {
             throw new EmailAlreadyExistsException("Email já cadastrado");
         }
 
-        String passwordHash = passwordEncoder.encode(data.password());
-        User newUser = new User(data.fullName(), data.email(), passwordHash);
+        User newUser = new User(
+                data.getName(),
+                data.getEmail(),
+                passwordEncoder.encode(data.getPassword()));
 
         return userRepository.save(newUser);
     }
