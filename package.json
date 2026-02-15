@@ -11,6 +11,12 @@
     "services:stop": "docker-compose stop",
     "services:down": "docker-compose down",
     "backend:dev": "cd backend && ./mvnw spring-boot:run",
+    "test": "npx concurrently \"npm run backend:test\" \"npm run frontend:test\" --names \"BACK-TEST,FRONT-TEST\" --prefix-colors \"magenta,cyan\"",
+    "backend:test": "cd backend && ./mvnw test",
+    "frontend:test": "cd frontend && npm run test",
+    "test:watch": "npx concurrently \"npm run backend:test:watch\" \"npm run frontend:test:watch\" --names \"BACK-WATCH,FRONT-WATCH\"",
+    "frontend:test:watch": "cd frontend && npm run test:watch",
+    "backend:test:watch": "cd backend && ./mvnw test -Dspring-boot.run.profiles=test",
     "frontend:dev": "cd frontend && npm run dev",
     "frontend:install": "cd frontend && npm install",
     "build:frontend": "cd frontend && npm run build"
