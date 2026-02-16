@@ -7,7 +7,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Disabled("Disabled temporarily to unblock CI/CD pipeline")
 class ApexFitBackendApplicationTests {
 
     @Test
