@@ -14,7 +14,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "http://localhost:5173", "http://localhost:5174", "http://localhost:5175",
                         "http://localhost:5176", // Frontend Local (Flexible)
                         "https://*.vercel.app", // Qualquer deploy Vercel (Prod/Preview)
-                        "https://carti011.com.br" // Domínio Personalizado
+                        "https://carti011.com.br", // Domínio Personalizado
+                        "https://*.railway.app" // Railway domains
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "TRACE", "CONNECT")
                 .allowCredentials(true);
