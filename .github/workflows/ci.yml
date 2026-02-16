@@ -2,7 +2,7 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "develop", "fix/ci-tests" ]
   pull_request:
     branches: [ "main", "develop" ]
 
@@ -21,7 +21,7 @@ jobs:
         cache: maven
 
     - name: Build with Maven
-      run: mvn -B package -DskipTests --file backend/pom.xml
+      run: mvn -B clean package -DskipTests --file backend/pom.xml
       
-    # - name: Run Tests
-    #   run: mvn -B test --file backend/pom.xml
+    - name: Run Tests
+      run: mvn -B test --file backend/pom.xml
