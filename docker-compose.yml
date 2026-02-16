@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: apexuser
       POSTGRES_PASSWORD: apexpassword
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
