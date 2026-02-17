@@ -30,10 +30,10 @@ frontend/yarn-error.log*
 postgres_data/
 
 
+
 # Agent
 .agent/*
-!.agent/skills/
-!.agent/workflows/
+# .agent/skills/ CANNOT be versioned as per user request.
 
 # Logs
 logs/
