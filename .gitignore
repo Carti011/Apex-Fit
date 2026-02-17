@@ -29,6 +29,12 @@ frontend/yarn-error.log*
 # Docker
 postgres_data/
 
+
+# Agent
+.agent/*
+!.agent/skills/
+!.agent/workflows/
+
 # Logs
 logs/
 *.log
