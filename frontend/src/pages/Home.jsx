@@ -9,9 +9,9 @@ function Home() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Usa a variável de ambiente se existir, senão tenta relativo (fallback)
-        const apiUrl = import.meta.env.VITE_API_URL || '';
-        fetch(`${apiUrl}/api/v1/status`)
+        // Ajuste para não duplicar /api/v1 se já estiver na env
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
+        fetch(`${apiUrl}/status`)
             .then(res => res.json())
             .then(data => setStatus('Online 🟢'))
             .catch((err) => {

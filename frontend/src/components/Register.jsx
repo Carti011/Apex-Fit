@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { api } from '../services/api';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, CheckCircle } from 'lucide-react';
 import '../App.css';
+import { api } from '../services/api';
 
 export function Register() {
     const [formData, setFormData] = useState({
@@ -12,6 +12,7 @@ export function Register() {
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(false);
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -25,14 +26,43 @@ export function Register() {
 
         try {
             await api.register(formData);
-            // Sucesso: Redirecionar para login (placeholder)
-            navigate('/login');
+            setSuccess(true);
         } catch (err) {
             setError(err.message);
         } finally {
             setLoading(false);
         }
     };
+
+    if (success) {
+        return (
+            <div className="app-layout" style={{ justifyContent: 'center', alignItems: 'center', background: 'radial-gradient(circle at center, rgba(0, 255, 136, 0.1) 0%, rgba(13, 13, 13, 1) 100%)' }}>
+                <div className="glass" style={{ padding: '3rem', borderRadius: '24px', maxWidth: '450px', width: '100%', boxShadow: '0 8px 32px rgba(0, 255, 136, 0.2)', textAlign: 'center' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+                        <div style={{ background: 'rgba(0, 255, 136, 0.2)', padding: '1.5rem', borderRadius: '50%' }}>
+                            <CheckCircle size={48} color="#00ff88" />
+                        </div>
+                    </div>
+
+                    <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>
+                        Bem-vindo, <span className="highlight-gradient">{formData.name}</span>!
+                    </h2>
+
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '1.1rem' }}>
+                        Sua conta foi criada com sucesso. Prepare-se para evoluir.
+                    </p>
+
+                    <button
+                        onClick={() => navigate('/')}
+                        className="cta-button primary"
+                        style={{ width: '100%', justifyContent: 'center' }}
+                    >
+                        Ir para Home
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="app-layout" style={{ justifyContent: 'center', alignItems: 'center', background: 'radial-gradient(circle at center, rgba(0, 255, 136, 0.1) 0%, rgba(13, 13, 13, 1) 100%)' }}>
