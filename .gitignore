@@ -1,10 +1,14 @@
+
+# Agent
+.agent/
+.agent/*
+
 # OS / IDEs
 .DS_Store
 .idea/
 .vscode/
-.vscode/
 *.swp
-*.log
+
 
 # Dependencies
 node_modules/
@@ -28,6 +32,12 @@ frontend/yarn-error.log*
 
 # Docker
 postgres_data/
+
+
+
+# Agent
+.agent/*
+# .agent/skills/ CANNOT be versioned as per user request.
 
 # Logs
 logs/
