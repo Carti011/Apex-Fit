@@ -49,7 +49,7 @@ public class AuthServiceTest {
 
     @BeforeEach
     void setUp() {
-        registerDTO = new RegisterDTO("Test User", "test@example.com", "password", "password");
+        registerDTO = new RegisterDTO("Test User", "test@example.com", "password");
         loginDTO = new LoginDTO("test@example.com", "password");
         user = new User("Test User", "test@example.com", "encodedPassword");
     }
