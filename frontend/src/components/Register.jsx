@@ -1,149 +1,140 @@
 import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, CheckCircle } from 'lucide-react';
+import '../App.css';
 import { api } from '../services/api';
-import { useNavigate } from 'react-router-dom';
-import { Dumbbell, User, Mail, Lock, Loader2 } from 'lucide-react';
 
-export default function Register() {
-    const navigate = useNavigate();
+export function Register() {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         password: ''
     });
-    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(false);
+    const navigate = useNavigate();
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
         setLoading(true);
+        setError(null);
 
         try {
             await api.register(formData);
-            navigate('/login?registered=true');
+            setSuccess(true);
         } catch (err) {
-            setError(err.message || 'Ocorreu um erro ao criar a conta.');
+            setError(err.message);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
-    };
-
-    return (
-        <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-            {/* Background Effects */}
-            <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/10 rounded-full blur-[100px]" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[100px]" />
-            </div>
-
-            <div className="relative w-full max-w-md">
-                {/* Glass Card */}
-                <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
-
-                    <div className="text-center mb-8">
-                        <div className="flex justify-center mb-4">
-                            <div className="bg-gradient-to-br from-emerald-400 to-blue-500 p-3 rounded-xl shadow-lg shadow-emerald-500/20">
-                                <Dumbbell className="w-8 h-8 text-white" />
-                            </div>
+    if (success) {
+        return (
+            <div className="app-layout" style={{ justifyContent: 'center', alignItems: 'center', background: 'radial-gradient(circle at center, rgba(0, 255, 136, 0.1) 0%, rgba(13, 13, 13, 1) 100%)' }}>
+                <div className="glass" style={{ padding: '3rem', borderRadius: '24px', maxWidth: '450px', width: '100%', boxShadow: '0 8px 32px rgba(0, 255, 136, 0.2)', textAlign: 'center' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+                        <div style={{ background: 'rgba(0, 255, 136, 0.2)', padding: '1.5rem', borderRadius: '50%' }}>
+                            <CheckCircle size={48} color="#00ff88" />
                         </div>
-                        <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-                            Crie sua conta
-                        </h2>
-                        <p className="text-slate-400 mt-2">Comece sua jornada fitness hoje</p>
                     </div>
 
-                    {error && (
-                        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm flex items-center gap-2">
-                            ⚠️ {error}
-                        </div>
-                    )}
+                    <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>
+                        Bem-vindo, <span className="highlight-gradient">{formData.name}</span>!
+                    </h2>
 
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                        <div className="space-y-1">
-                            <label className="text-sm font-medium text-slate-300 ml-1">Nome Completo</label>
-                            <div className="relative group">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <User className="h-5 w-5 text-slate-500 group-focus-within:text-emerald-400 transition-colors" />
-                                </div>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    required
-                                    value={formData.name}
-                                    onChange={handleChange}
-                                    className="w-full bg-slate-900/50 border border-slate-700 text-slate-200 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all placeholder:text-slate-600"
-                                    placeholder="Seu nome"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-1">
-                            <label className="text-sm font-medium text-slate-300 ml-1">Email</label>
-                            <div className="relative group">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Mail className="h-5 w-5 text-slate-500 group-focus-within:text-emerald-400 transition-colors" />
-                                </div>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    required
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    className="w-full bg-slate-900/50 border border-slate-700 text-slate-200 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all placeholder:text-slate-600"
-                                    placeholder="seu@email.com"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-1">
-                            <label className="text-sm font-medium text-slate-300 ml-1">Senha</label>
-                            <div className="relative group">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Lock className="h-5 w-5 text-slate-500 group-focus-within:text-emerald-400 transition-colors" />
-                                </div>
-                                <input
-                                    type="password"
-                                    name="password"
-                                    required
-                                    minLength={6}
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    className="w-full bg-slate-900/50 border border-slate-700 text-slate-200 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all placeholder:text-slate-600"
-                                    placeholder="Mínimo 6 caracteres"
-                                />
-                            </div>
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-emerald-500/20 transform transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                        >
-                            {loading ? (
-                                <>
-                                    <Loader2 className="w-5 h-5 animate-spin" />
-                                    Criando conta...
-                                </>
-                            ) : (
-                                'Criar Conta Grátis'
-                            )}
-                        </button>
-                    </form>
-
-                    <p className="mt-6 text-center text-slate-400 text-sm">
-                        Já tem uma conta?{' '}
-                        <a href="/login" className="text-emerald-400 hover:text-emerald-300 font-medium transition-colors">
-                            Fazer Login
-                        </a>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '1.1rem' }}>
+                        Sua conta foi criada com sucesso. Prepare-se para evoluir.
                     </p>
+
+                    <button
+                        onClick={() => navigate('/')}
+                        className="cta-button primary"
+                        style={{ width: '100%', justifyContent: 'center' }}
+                    >
+                        Ir para Home
+                    </button>
                 </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="app-layout" style={{ justifyContent: 'center', alignItems: 'center', background: 'radial-gradient(circle at center, rgba(0, 255, 136, 0.1) 0%, rgba(13, 13, 13, 1) 100%)' }}>
+
+            <button
+                onClick={() => navigate('/')}
+                style={{ position: 'absolute', top: '2rem', left: '2rem', background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            >
+                <ArrowLeft size={20} /> Voltar para Home
+            </button>
+
+            <div className="glass" style={{ padding: '2.5rem', borderRadius: '16px', maxWidth: '400px', width: '100%', boxShadow: '0 4px 30px rgba(0, 0, 0, 0.5)' }}>
+                <h2 style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '2rem' }}>
+                    Crie sua Conta <span className="highlight-gradient">APEX</span>
+                </h2>
+
+                {error && <div style={{ background: 'rgba(255, 77, 77, 0.1)', color: '#ff4d4d', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', textAlign: 'center', fontSize: '0.9rem', border: '1px solid rgba(255, 77, 77, 0.2)' }}>{error}</div>}
+
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Nome de Herói</label>
+                        <input
+                            type="text"
+                            name="name"
+                            required
+                            value={formData.name}
+                            onChange={handleChange}
+                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', color: 'white', fontSize: '1rem', outline: 'none' }}
+                            placeholder="Ex: Aragorn"
+                        />
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Email de Contato</label>
+                        <input
+                            type="email"
+                            name="email"
+                            required
+                            value={formData.email}
+                            onChange={handleChange}
+                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', color: 'white', fontSize: '1rem', outline: 'none' }}
+                            placeholder="seu@email.com"
+                        />
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Senha Secreta</label>
+                        <input
+                            type="password"
+                            name="password"
+                            required
+                            minLength={6}
+                            value={formData.password}
+                            onChange={handleChange}
+                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', color: 'white', fontSize: '1rem', outline: 'none' }}
+                            placeholder="••••••••"
+                        />
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="cta-button primary"
+                        disabled={loading}
+                        style={{ marginTop: '1rem', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                    >
+                        {loading ? <span className="pulsing-dot" style={{ width: '10px', height: '10px', background: 'black', boxShadow: 'none' }}></span> : 'Criar Conta Grátis'}
+                    </button>
+                </form>
+
+                <p style={{ marginTop: '1.5rem', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                    Já tem conta? <Link to="/login" style={{ color: 'var(--accent-color)', textDecoration: 'none' }}>Entrar</Link>
+                </p>
             </div>
         </div>
     );
