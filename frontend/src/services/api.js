@@ -20,5 +20,21 @@ export const api = {
         }
 
         return response.json();
+    },
+
+    login: async (credentials) => {
+        const response = await fetch(`${API_URL}/auth/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(credentials),
+        });
+
+        if (!response.ok) {
+            throw new Error('Falha no login');
+        }
+
+        return response.json();
     }
 };
