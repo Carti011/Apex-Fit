@@ -5,28 +5,62 @@ import { LayoutDashboard, User, Utensils, LogOut } from 'lucide-react';
 import EvolutionPanel from '../components/dashboard/EvolutionPanel';
 import BioProfileForm from '../components/dashboard/BioProfileForm';
 import NutritionPlan from '../components/dashboard/NutritionPlan';
+import { api } from '../services/api';
 import './Dashboard.css';
 
 const Dashboard = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('dashboard');
+    const [dashboardData, setDashboardData] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchDashboardInfo = async () => {
+            if (!user || !user.token) return;
+            try {
+                const data = await api.getDashboard(user.token);
+                setDashboardData(data);
+            } catch (error) {
+                console.error("Erro ao carregar dashboard", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDashboardInfo();
+    }, [user]);
 
     const handleLogout = () => {
         logout();
         navigate('/');
     };
 
+    const handleProfileUpdate = async (bioPayload) => {
+        try {
+            const updatedData = await api.updateBioProfile(user.token, bioPayload);
+            setDashboardData(updatedData);
+            alert("Perfil salvo com sucesso!");
+            setActiveTab('diet'); // Redireciona para a aba de dieta para ver os resultados
+        } catch (error) {
+            alert("Erro ao salvar perfil");
+            console.error(error);
+        }
+    };
+
     const renderContent = () => {
+        if (loading) return <div style={{ color: 'white', textAlign: 'center', padding: '2rem' }}>Carregando seus dados...</div>;
+
         switch (activeTab) {
             case 'dashboard':
-                return <EvolutionPanel user={user} />;
+                // Temporarily mixing user auth data with dashboard gamification data
+                return <EvolutionPanel user={{ ...user, ...dashboardData }} />;
             case 'profile':
-                return <BioProfileForm user={user} onUpdate={(data) => console.log('Update', data)} />;
+                return <BioProfileForm user={dashboardData} onUpdate={handleProfileUpdate} />;
             case 'diet':
-                return <NutritionPlan />;
+                return <NutritionPlan nutrition={dashboardData?.nutritionPlan} />;
             default:
-                return <EvolutionPanel user={user} />;
+                return <EvolutionPanel user={{ ...user, ...dashboardData }} />;
         }
     };
 

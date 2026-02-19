@@ -1,16 +1,14 @@
-import { Apple, Battery } from 'lucide-react';
+import { Apple, Battery, Flame } from 'lucide-react';
 
-const NutritionPlan = () => {
-    // Placeholder data
-    const nutrition = {
-        tmb: 1800,
-        get: 2600,
-        macros: {
-            protein: 180,
-            carbs: 300,
-            fats: 70
-        }
-    };
+const NutritionPlan = ({ nutrition }) => {
+    if (!nutrition) {
+        return (
+            <div className="fade-in glass" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                <h3>⚠️ Perfil Incompleto</h3>
+                <p>Preencha seus dados na aba <b>Perfil</b> para gerarmos seu cálculo metabólico e nutricional.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="fade-in">
@@ -46,15 +44,15 @@ const NutritionPlan = () => {
 
                 <div className="macros-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', textAlign: 'center' }}>
                     <div className="macro-item">
-                        <div className="macro-val" style={{ color: '#00ff88', fontSize: '1.25rem', fontWeight: 'bold' }}>{nutrition.macros.protein}g</div>
+                        <div className="macro-val" style={{ color: '#00ff88', fontSize: '1.25rem', fontWeight: 'bold' }}>{nutrition.protein}g</div>
                         <div className="macro-label" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Proteína</div>
                     </div>
                     <div className="macro-item">
-                        <div className="macro-val" style={{ color: '#00ff88', fontSize: '1.25rem', fontWeight: 'bold' }}>{nutrition.macros.carbs}g</div>
+                        <div className="macro-val" style={{ color: '#00ff88', fontSize: '1.25rem', fontWeight: 'bold' }}>{nutrition.carbs}g</div>
                         <div className="macro-label" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Carbo</div>
                     </div>
                     <div className="macro-item">
-                        <div className="macro-val" style={{ color: '#00ff88', fontSize: '1.25rem', fontWeight: 'bold' }}>{nutrition.macros.fats}g</div>
+                        <div className="macro-val" style={{ color: '#00ff88', fontSize: '1.25rem', fontWeight: 'bold' }}>{nutrition.fats}g</div>
                         <div className="macro-label" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Gordura</div>
                     </div>
                 </div>
