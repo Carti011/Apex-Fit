@@ -26,7 +26,7 @@ function Home() {
         <div className="app-layout">
             {/* Navbar */}
             <nav className="navbar">
-                <div className="logo-container">
+                <div className="logo-container" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
                     <img src="/apex-logo.svg" alt="Apex Logo" className="nav-logo" />
                     <span className="nav-brand">APEX<span className="highlight">FIT</span></span>
                 </div>
