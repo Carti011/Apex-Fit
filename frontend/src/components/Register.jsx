@@ -1,6 +1,9 @@
 import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, CheckCircle } from 'lucide-react';
+
+import { ArrowLeft, CheckCircle, Eye, EyeOff } from 'lucide-react';
+import '../App.css';
 import '../App.css';
 import { api } from '../services/api';
 
@@ -8,15 +11,22 @@ export function Register() {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        password: ''
+        password: '',
+        confirmPassword: ''
     });
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
     };
 
     const handleSubmit = async (e) => {
@@ -24,9 +34,25 @@ export function Register() {
         setLoading(true);
         setError(null);
 
+        if (formData.password !== formData.confirmPassword) {
+            setError("As senhas não coincidem.");
+            setLoading(false);
+            return;
+        }
+
         try {
-            await api.register(formData);
+            // Remove confirmPassword before sending to API
+            const { confirmPassword, ...dataToSend } = formData;
+            await api.register(dataToSend);
+
+            // Auto-login after successful registration
+            await login(formData.email, formData.password);
             setSuccess(true);
+
+            // Short delay to show success message then redirect
+            setTimeout(() => {
+                navigate('/');
+            }, 2000);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -49,16 +75,8 @@ export function Register() {
                     </h2>
 
                     <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '1.1rem' }}>
-                        Sua conta foi criada com sucesso. Prepare-se para evoluir.
+                        Login efetuado. Redirecionando para a base...
                     </p>
-
-                    <button
-                        onClick={() => navigate('/')}
-                        className="cta-button primary"
-                        style={{ width: '100%', justifyContent: 'center' }}
-                    >
-                        Ir para Home
-                    </button>
                 </div>
             </div>
         );
@@ -108,18 +126,50 @@ export function Register() {
                         />
                     </div>
 
-                    <div>
+                    <div style={{ position: 'relative' }}>
                         <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Senha Secreta</label>
-                        <input
-                            type="password"
-                            name="password"
-                            required
-                            minLength={6}
-                            value={formData.password}
-                            onChange={handleChange}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', color: 'white', fontSize: '1rem', outline: 'none' }}
-                            placeholder="••••••••"
-                        />
+                        <div style={{ position: 'relative' }}>
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                name="password"
+                                required
+                                minLength={6}
+                                value={formData.password}
+                                onChange={handleChange}
+                                style={{ width: '100%', padding: '0.75rem', paddingRight: '2.5rem', borderRadius: '8px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', color: 'white', fontSize: '1rem', outline: 'none' }}
+                                placeholder="••••••••"
+                            />
+                            <button
+                                type="button"
+                                onClick={togglePasswordVisibility}
+                                style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                            >
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style={{ position: 'relative' }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Confirmar Senha</label>
+                        <div style={{ position: 'relative' }}>
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                name="confirmPassword"
+                                required
+                                minLength={6}
+                                value={formData.confirmPassword}
+                                onChange={handleChange}
+                                style={{ width: '100%', padding: '0.75rem', paddingRight: '2.5rem', borderRadius: '8px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', color: 'white', fontSize: '1rem', outline: 'none' }}
+                                placeholder="••••••••"
+                            />
+                            <button
+                                type="button"
+                                onClick={togglePasswordVisibility}
+                                style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                            >
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        </div>
                     </div>
 
                     <button
