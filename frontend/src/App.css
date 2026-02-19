@@ -282,7 +282,8 @@
 
   .mobile-menu-btn {
     display: block;
-    z-index: 101; /* Ensure button is above menu */
+    z-index: 101;
+    /* Ensure button is above menu */
     position: relative;
   }
 
@@ -296,7 +297,8 @@
     height: 100vh;
     background: rgba(13, 13, 13, 0.95);
     backdrop-filter: blur(10px);
-    justify-content: center;
+    justify-content: flex-start;
+    padding-top: 25vh;
     align-items: center;
     gap: 2rem;
     z-index: 100;
