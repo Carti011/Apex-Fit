@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 
 import { ArrowLeft, CheckCircle, Eye, EyeOff } from 'lucide-react';
@@ -18,6 +19,7 @@ export function Register() {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -42,7 +44,15 @@ export function Register() {
             // Remove confirmPassword before sending to API
             const { confirmPassword, ...dataToSend } = formData;
             await api.register(dataToSend);
+
+            // Auto-login after successful registration
+            await login(formData.email, formData.password);
             setSuccess(true);
+
+            // Short delay to show success message then redirect
+            setTimeout(() => {
+                navigate('/');
+            }, 2000);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -65,16 +75,8 @@ export function Register() {
                     </h2>
 
                     <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '1.1rem' }}>
-                        Sua conta foi criada com sucesso. Prepare-se para evoluir.
+                        Login efetuado. Redirecionando para a base...
                     </p>
-
-                    <button
-                        onClick={() => navigate('/')}
-                        className="cta-button primary"
-                        style={{ width: '100%', justifyContent: 'center' }}
-                    >
-                        Ir para Home
-                    </button>
                 </div>
             </div>
         );

@@ -65,7 +65,9 @@ function Home() {
                     </p>
 
                     <div className="hero-actions">
-                        <button className="cta-button primary" onClick={() => navigate('/register')}>Começar Agora</button>
+                        {!user && (
+                            <button className="cta-button primary" onClick={() => navigate('/register')}>Começar Agora</button>
+                        )}
                         <button className="cta-button secondary">Ver Demo</button>
                     </div>
                 </div>
