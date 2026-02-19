@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import { Register } from './components/Register';
 import { Login } from './components/Login';
-import Profile from './pages/Profile';
+import Dashboard from './pages/Dashboard';
 import { AuthProvider } from './context/AuthContext';
 import './App.css'
 
@@ -14,7 +14,9 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          {/* Keep profile for backwards compatibility or redirect */}
+          <Route path="/profile" element={<Dashboard />} />
         </Routes>
       </AuthProvider>
     </Router>
