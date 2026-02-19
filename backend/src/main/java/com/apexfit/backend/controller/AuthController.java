@@ -27,4 +27,10 @@ public class AuthController {
         User createdUser = authService.register(data);
         return ResponseEntity.created(URI.create("/users/" + createdUser.getId())).body(createdUser);
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<com.apexfit.backend.dto.AuthResponseDTO> login(
+            @RequestBody @Valid com.apexfit.backend.dto.LoginDTO data) {
+        return ResponseEntity.ok(authService.login(data));
+    }
 }
