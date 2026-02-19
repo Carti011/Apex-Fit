@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, CheckCircle } from 'lucide-react';
+
+import { ArrowLeft, CheckCircle, Eye, EyeOff } from 'lucide-react';
+import '../App.css';
 import '../App.css';
 import { api } from '../services/api';
 
@@ -8,8 +10,10 @@ export function Register() {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        password: ''
+        password: '',
+        confirmPassword: ''
     });
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
@@ -19,13 +23,25 @@ export function Register() {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
 
+        if (formData.password !== formData.confirmPassword) {
+            setError("As senhas não coincidem.");
+            setLoading(false);
+            return;
+        }
+
         try {
-            await api.register(formData);
+            // Remove confirmPassword before sending to API
+            const { confirmPassword, ...dataToSend } = formData;
+            await api.register(dataToSend);
             setSuccess(true);
         } catch (err) {
             setError(err.message);
@@ -108,18 +124,50 @@ export function Register() {
                         />
                     </div>
 
-                    <div>
+                    <div style={{ position: 'relative' }}>
                         <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Senha Secreta</label>
-                        <input
-                            type="password"
-                            name="password"
-                            required
-                            minLength={6}
-                            value={formData.password}
-                            onChange={handleChange}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', color: 'white', fontSize: '1rem', outline: 'none' }}
-                            placeholder="••••••••"
-                        />
+                        <div style={{ position: 'relative' }}>
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                name="password"
+                                required
+                                minLength={6}
+                                value={formData.password}
+                                onChange={handleChange}
+                                style={{ width: '100%', padding: '0.75rem', paddingRight: '2.5rem', borderRadius: '8px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', color: 'white', fontSize: '1rem', outline: 'none' }}
+                                placeholder="••••••••"
+                            />
+                            <button
+                                type="button"
+                                onClick={togglePasswordVisibility}
+                                style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                            >
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style={{ position: 'relative' }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Confirmar Senha</label>
+                        <div style={{ position: 'relative' }}>
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                name="confirmPassword"
+                                required
+                                minLength={6}
+                                value={formData.confirmPassword}
+                                onChange={handleChange}
+                                style={{ width: '100%', padding: '0.75rem', paddingRight: '2.5rem', borderRadius: '8px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', color: 'white', fontSize: '1rem', outline: 'none' }}
+                                placeholder="••••••••"
+                            />
+                            <button
+                                type="button"
+                                onClick={togglePasswordVisibility}
+                                style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                            >
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        </div>
                     </div>
 
                     <button

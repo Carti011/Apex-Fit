@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Activity, Zap, TrendingUp, Menu, X } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import '../App.css'
 
 function Home() {
     const [status, setStatus] = useState('Verificando...')
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const navigate = useNavigate();
+    const { user } = useAuth();
 
     useEffect(() => {
         // Ajuste para não duplicar /api/v1 se já estiver na env
@@ -33,7 +35,11 @@ function Home() {
                     <a href="#features">Recursos</a>
                     <a href="#about">Sobre</a>
                     <a href="#pricing">Planos</a>
-                    <Link to="/login" className="nav-cta">Entrar</Link>
+                    {user ? (
+                        <Link to="/profile" className="nav-cta">Meu Perfil</Link>
+                    ) : (
+                        <Link to="/login" className="nav-cta">Entrar</Link>
+                    )}
                 </div>
 
                 <button className="mobile-menu-btn" onClick={() => setIsMenuOpen(!isMenuOpen)}>
