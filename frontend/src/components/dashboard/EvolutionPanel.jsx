@@ -1,4 +1,5 @@
 import { Trophy, Flame, Target } from 'lucide-react';
+import WeeklyChart from './WeeklyChart';
 import '../../App.css';
 
 const EvolutionPanel = ({ user }) => {
@@ -49,9 +50,12 @@ const EvolutionPanel = ({ user }) => {
                 </div>
             </div>
 
-            {/* Placeholder para Gráfico */}
-            <div className="glass" style={{ marginTop: '2rem', padding: '2rem', height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
-                Gráfico de Evolução Semanal (Em Breve)
+            {/* Gráfico de Evolução Semanal */}
+            <div className="glass" style={{ marginTop: '2rem', padding: '1.5rem', height: '350px', borderRadius: '16px', display: 'flex', flexDirection: 'column' }}>
+                <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', color: 'var(--text-secondary)' }}>Evolução Semanal</h3>
+                <div style={{ flex: 1, minHeight: 0 }}>
+                    <WeeklyChart />
+                </div>
             </div>
         </div>
     );
