@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import api from '../../services/api';
+import { api } from '../../services/api';
 
 const WeeklyChart = () => {
     const [data, setData] = useState([]);
@@ -9,8 +9,11 @@ const WeeklyChart = () => {
     useEffect(() => {
         const fetchHistory = async () => {
             try {
-                const response = await api.get('/gamification/history');
-                setData(response.data);
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                const response = await api.getGamificationHistory(token);
+                setData(response); // response is the array of data directly from res.json()
             } catch (error) {
                 console.error("Erro ao buscar histórico de XP:", error);
             } finally {
