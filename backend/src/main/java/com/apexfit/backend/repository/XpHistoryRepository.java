@@ -15,4 +15,6 @@ public interface XpHistoryRepository extends JpaRepository<XpHistory, Long> {
     Optional<XpHistory> findByUserAndDate(User user, LocalDate date);
 
     List<XpHistory> findByUserAndDateBetweenOrderByDateAsc(User user, LocalDate startDate, LocalDate endDate);
+
+    Optional<XpHistory> findFirstByUserOrderByDateAsc(User user);
 }

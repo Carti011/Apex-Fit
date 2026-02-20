@@ -147,10 +147,21 @@ public class GamificationService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         LocalDate today = LocalDate.now();
-        LocalDate sevenDaysAgo = today.minusDays(6); // Today + 6 previous days = 7 days
+
+        // Find the first date the user gained XP, default to 7 days ago if no history
+        LocalDate startDate = xpHistoryRepository.findFirstByUserOrderByDateAsc(user)
+                .map(XpHistory::getDate)
+                .orElse(today.minusDays(6));
+
+        // Let's cap it at today just in case
+        if (startDate.isAfter(today)) {
+            startDate = today;
+        }
+
+        long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(startDate, today);
 
         java.util.List<XpHistory> historyList = xpHistoryRepository.findByUserAndDateBetweenOrderByDateAsc(user,
-                sevenDaysAgo, today);
+                startDate, today);
 
         // Fill missing days with 0 XP
         java.util.Map<LocalDate, Integer> historyMap = new java.util.HashMap<>();
@@ -161,8 +172,8 @@ public class GamificationService {
         java.util.List<com.apexfit.backend.dto.XpHistoryDTO> result = new java.util.ArrayList<>();
         java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM");
 
-        for (int i = 0; i < 7; i++) {
-            LocalDate date = sevenDaysAgo.plusDays(i);
+        for (int i = 0; i <= daysBetween; i++) {
+            LocalDate date = startDate.plusDays(i);
             int xp = historyMap.getOrDefault(date, 0);
             result.add(new com.apexfit.backend.dto.XpHistoryDTO(date.format(formatter), xp));
         }
