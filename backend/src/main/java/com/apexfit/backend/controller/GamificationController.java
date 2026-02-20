@@ -32,4 +32,12 @@ public class GamificationController {
         DashboardDataDTO updatedData = profileService.getDashboardDataByEmail(authentication.getName());
         return ResponseEntity.ok(updatedData);
     }
+
+    @org.springframework.web.bind.annotation.GetMapping("/history")
+    public ResponseEntity<java.util.List<com.apexfit.backend.dto.XpHistoryDTO>> getWeeklyHistory(
+            Authentication authentication) {
+        java.util.List<com.apexfit.backend.dto.XpHistoryDTO> history = gamificationService
+                .getWeeklyXpHistory(authentication.getName());
+        return ResponseEntity.ok(history);
+    }
 }

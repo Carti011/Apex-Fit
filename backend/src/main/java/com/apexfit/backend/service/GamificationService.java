@@ -1,7 +1,9 @@
 package com.apexfit.backend.service;
 
 import com.apexfit.backend.model.User;
+import com.apexfit.backend.model.XpHistory;
 import com.apexfit.backend.repository.UserRepository;
+import com.apexfit.backend.repository.XpHistoryRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -11,13 +13,15 @@ import java.time.temporal.ChronoUnit;
 public class GamificationService {
 
     private final UserRepository userRepository;
+    private final XpHistoryRepository xpHistoryRepository;
 
-    public GamificationService(UserRepository userRepository) {
+    public GamificationService(UserRepository userRepository, XpHistoryRepository xpHistoryRepository) {
         this.userRepository = userRepository;
+        this.xpHistoryRepository = xpHistoryRepository;
     }
 
     /**
-     * Adds XP to a user and handles level ups.
+     * Adds XP to a user, handles level ups, and logs the gain in XpHistory.
      */
     public User addXp(User user, int amount) {
         if (amount <= 0)
@@ -33,7 +37,16 @@ public class GamificationService {
         }
 
         user.setCurrentXp(newXp);
-        return userRepository.save(user);
+        user = userRepository.save(user);
+
+        // Track Daily XP Gain
+        LocalDate today = LocalDate.now();
+        XpHistory history = xpHistoryRepository.findByUserAndDate(user, today)
+                .orElse(new XpHistory(user, today, 0));
+        history.setXpGained(history.getXpGained() + amount);
+        xpHistoryRepository.save(history);
+
+        return user;
     }
 
     /**
@@ -124,5 +137,36 @@ public class GamificationService {
             return userRepository.save(user);
         }
         return user;
+    }
+
+    /**
+     * Retrieves the XP history for the last 7 days.
+     */
+    public java.util.List<com.apexfit.backend.dto.XpHistoryDTO> getWeeklyXpHistory(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        LocalDate today = LocalDate.now();
+        LocalDate sevenDaysAgo = today.minusDays(6); // Today + 6 previous days = 7 days
+
+        java.util.List<XpHistory> historyList = xpHistoryRepository.findByUserAndDateBetweenOrderByDateAsc(user,
+                sevenDaysAgo, today);
+
+        // Fill missing days with 0 XP
+        java.util.Map<LocalDate, Integer> historyMap = new java.util.HashMap<>();
+        for (XpHistory h : historyList) {
+            historyMap.put(h.getDate(), h.getXpGained());
+        }
+
+        java.util.List<com.apexfit.backend.dto.XpHistoryDTO> result = new java.util.ArrayList<>();
+        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM");
+
+        for (int i = 0; i < 7; i++) {
+            LocalDate date = sevenDaysAgo.plusDays(i);
+            int xp = historyMap.getOrDefault(date, 0);
+            result.add(new com.apexfit.backend.dto.XpHistoryDTO(date.format(formatter), xp));
+        }
+
+        return result;
     }
 }
