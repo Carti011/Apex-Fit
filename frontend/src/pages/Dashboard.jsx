@@ -156,6 +156,10 @@ const Dashboard = () => {
                             <span className="user-level">Nível {user?.level || 1} • Iniciante</span>
                         </div>
                     </div>
+                    {/* Logout Button (Visible only on mobile via CSS) */}
+                    <button className="mobile-logout-btn" onClick={handleLogout} aria-label="Sair">
+                        <LogOut size={24} />
+                    </button>
                 </header>
 
                 <div className="dashboard-content">
