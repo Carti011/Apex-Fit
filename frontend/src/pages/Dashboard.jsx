@@ -163,40 +163,20 @@ const Dashboard = () => {
                 </div>
             </main>
 
-            {/* Level Up Toast Notification */}
+            {/* Level Up Modal Notification */}
             {showLevelUp && (
-                <div className="level-up-toast fade-in" style={{
-                    position: 'fixed',
-                    bottom: '2rem',
-                    right: '2rem',
-                    background: 'linear-gradient(135deg, var(--gold), #ffb703)',
-                    color: '#000',
-                    padding: '1.5rem',
-                    borderRadius: 'var(--radius)',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    zIndex: 1000
-                }}>
-                    <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800 }}>LEVEL UP! 🚀</h3>
-                    <p style={{ margin: 0, fontWeight: 600 }}>Você alcançou o Nível {user?.level}</p>
-                    <button
-                        onClick={() => setShowLevelUp(false)}
-                        style={{
-                            marginTop: '0.5rem',
-                            padding: '0.5rem 1rem',
-                            background: '#000',
-                            color: 'var(--gold)',
-                            border: 'none',
-                            borderRadius: '20px',
-                            cursor: 'pointer',
-                            fontWeight: 'bold'
-                        }}
-                    >
-                        Incrível!
-                    </button>
+                <div className="level-up-overlay">
+                    <div className="level-up-modal slide-up-bounce">
+                        <div className="level-up-icon">⭐</div>
+                        <h3 className="level-up-title">LEVEL UP! 🚀</h3>
+                        <p className="level-up-text">Você alcançou o Nível <span className="highlight-level">{user?.level}</span></p>
+                        <button
+                            className="level-up-btn"
+                            onClick={() => setShowLevelUp(false)}
+                        >
+                            Incrível!
+                        </button>
+                    </div>
                 </div>
             )}
         </div>
