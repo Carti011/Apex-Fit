@@ -72,6 +72,9 @@ public class ProfileService {
                 user.getCurrentXp(),
                 user.getTargetXp(),
                 user.getCurrentStreak(),
+                user.isWaterGoalMet(),
+                user.isDietGoalMet(),
+                user.isWorkoutGoalMet(),
                 bio,
                 nutrition);
     }

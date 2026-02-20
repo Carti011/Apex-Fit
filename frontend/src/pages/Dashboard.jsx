@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { LayoutDashboard, User, Utensils, LogOut } from 'lucide-react';
 import EvolutionPanel from '../components/dashboard/EvolutionPanel';
+import DailyQuests from '../components/dashboard/DailyQuests';
 import BioProfileForm from '../components/dashboard/BioProfileForm';
 import NutritionPlan from '../components/dashboard/NutritionPlan';
 import { api } from '../services/api';
@@ -58,13 +59,34 @@ const Dashboard = () => {
         }
     };
 
+    const handleQuestComplete = async (questType) => {
+        try {
+            const updatedData = await api.completeQuest(user.token, questType);
+
+            // Check for Level Up
+            if (prevLevel && updatedData.level > prevLevel) {
+                setShowLevelUp(true);
+            }
+
+            setPrevLevel(updatedData.level);
+            setDashboardData(updatedData);
+        } catch (error) {
+            alert("Erro ao concluir missão");
+            console.error(error);
+        }
+    };
+
     const renderContent = () => {
         if (loading) return <div style={{ color: 'white', textAlign: 'center', padding: '2rem' }}>Carregando seus dados...</div>;
 
         switch (activeTab) {
             case 'dashboard':
-                // Temporarily mixing user auth data with dashboard gamification data
-                return <EvolutionPanel user={{ ...user, ...dashboardData }} />;
+                return (
+                    <>
+                        <EvolutionPanel user={{ ...user, ...dashboardData }} />
+                        <DailyQuests user={{ ...user, ...dashboardData }} onQuestComplete={handleQuestComplete} />
+                    </>
+                );
             case 'profile':
                 return <BioProfileForm user={dashboardData} onUpdate={handleProfileUpdate} />;
             case 'diet':

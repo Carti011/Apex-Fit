@@ -69,5 +69,21 @@ export const api = {
         }
 
         return response.json();
+    },
+
+    completeQuest: async (token, questType) => {
+        const response = await fetch(`${API_URL}/gamification/quests/complete?questType=${questType}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Falha ao concluir missão');
+        }
+
+        return response.json();
     }
 };

@@ -65,11 +65,64 @@ public class GamificationService {
             // If daysBetween == 0, they already logged activity today, do nothing to streak
         }
 
+        // Daily Quest Resets
+        LocalDate lastQuestReset = user.getLastGoalResetDate();
+        if (lastQuestReset == null || ChronoUnit.DAYS.between(lastQuestReset, today) >= 1) {
+            user.setWaterGoalMet(false);
+            user.setDietGoalMet(false);
+            user.setWorkoutGoalMet(false);
+            user.setLastGoalResetDate(today);
+        }
+
         if (isNewDay) {
             user.setLastActivityDate(today);
             user = addXp(user, 10); // Grant 10 XP for daily activity
         }
 
         return userRepository.save(user);
+    }
+
+    /**
+     * Completes a daily quest and awards XP.
+     */
+    public User completeQuest(String email, String questType) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Ensure quests are reset today before checking completeness
+        user = processDailyActivity(user);
+
+        boolean updated = false;
+
+        switch (questType.toUpperCase()) {
+            case "WATER":
+                if (!user.isWaterGoalMet()) {
+                    user.setWaterGoalMet(true);
+                    user = addXp(user, 20); // 20 XP for water
+                    updated = true;
+                }
+                break;
+            case "DIET":
+                if (!user.isDietGoalMet()) {
+                    user.setDietGoalMet(true);
+                    user = addXp(user, 30); // 30 XP for diet
+                    updated = true;
+                }
+                break;
+            case "WORKOUT":
+                if (!user.isWorkoutGoalMet()) {
+                    user.setWorkoutGoalMet(true);
+                    user = addXp(user, 50); // 50 XP for workout
+                    updated = true;
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown quest type: " + questType);
+        }
+
+        if (updated) {
+            return userRepository.save(user);
+        }
+        return user;
     }
 }
