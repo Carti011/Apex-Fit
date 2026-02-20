@@ -36,5 +36,38 @@ export const api = {
         }
 
         return response.json();
+    },
+
+    getDashboard: async (token) => {
+        const response = await fetch(`${API_URL}/profile/dashboard`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Falha ao obter dados do dashboard');
+        }
+
+        return response.json();
+    },
+
+    updateBioProfile: async (token, bioData) => {
+        const response = await fetch(`${API_URL}/profile/bio`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(bioData),
+        });
+
+        if (!response.ok) {
+            throw new Error('Falha ao atualizar perfil');
+        }
+
+        return response.json();
     }
 };

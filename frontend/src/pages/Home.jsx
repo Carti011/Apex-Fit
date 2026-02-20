@@ -36,7 +36,7 @@ function Home() {
                     <a href="#about">Sobre</a>
                     <a href="#pricing">Planos</a>
                     {user ? (
-                        <Link to="/profile" className="nav-cta">Meu Perfil</Link>
+                        <Link to="/dashboard" className="nav-cta">Dashboard</Link>
                     ) : (
                         <Link to="/login" className="nav-cta">Entrar</Link>
                     )}

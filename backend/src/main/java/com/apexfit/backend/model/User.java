@@ -3,7 +3,12 @@ package com.apexfit.backend.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import java.time.LocalDate;
 import java.util.Objects;
+
+import com.apexfit.backend.model.enums.ActivityLevel;
+import com.apexfit.backend.model.enums.Gender;
+import com.apexfit.backend.model.enums.Goal;
 
 @Entity
 @Table(name = "users")
@@ -23,6 +28,28 @@ public class User {
 
     @NotBlank
     private String password;
+
+    // Gamification Fields
+    private int level = 1;
+    private int currentXp = 0;
+    private int targetXp = 100;
+    private int currentStreak = 0;
+
+    // Bio Fields
+    private LocalDate birthDate;
+    private Double weight; // kg
+    private Double height; // cm
+
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
+    private Double bodyFatPercentage; // BF% (Optional)
+
+    @Enumerated(EnumType.STRING)
+    private ActivityLevel activityLevel;
+
+    @Enumerated(EnumType.STRING)
+    private Goal goal;
 
     public User() {
     }
@@ -70,6 +97,94 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
+    public int getCurrentXp() {
+        return currentXp;
+    }
+
+    public void setCurrentXp(int currentXp) {
+        this.currentXp = currentXp;
+    }
+
+    public int getTargetXp() {
+        return targetXp;
+    }
+
+    public void setTargetXp(int targetXp) {
+        this.targetXp = targetXp;
+    }
+
+    public int getCurrentStreak() {
+        return currentStreak;
+    }
+
+    public void setCurrentStreak(int currentStreak) {
+        this.currentStreak = currentStreak;
+    }
+
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public Double getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Double weight) {
+        this.weight = weight;
+    }
+
+    public Double getHeight() {
+        return height;
+    }
+
+    public void setHeight(Double height) {
+        this.height = height;
+    }
+
+    public Gender getGender() {
+        return gender;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
+    }
+
+    public Double getBodyFatPercentage() {
+        return bodyFatPercentage;
+    }
+
+    public void setBodyFatPercentage(Double bodyFatPercentage) {
+        this.bodyFatPercentage = bodyFatPercentage;
+    }
+
+    public ActivityLevel getActivityLevel() {
+        return activityLevel;
+    }
+
+    public void setActivityLevel(ActivityLevel activityLevel) {
+        this.activityLevel = activityLevel;
+    }
+
+    public Goal getGoal() {
+        return goal;
+    }
+
+    public void setGoal(Goal goal) {
+        this.goal = goal;
     }
 
     @Override
