@@ -1,0 +1,5 @@
+ALTER TABLE users
+ADD COLUMN water_goal_met BOOLEAN DEFAULT FALSE,
+ADD COLUMN diet_goal_met BOOLEAN DEFAULT FALSE,
+ADD COLUMN workout_goal_met BOOLEAN DEFAULT FALSE,
+ADD COLUMN last_goal_reset_date DATE;

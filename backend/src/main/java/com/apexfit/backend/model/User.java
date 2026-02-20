@@ -34,6 +34,13 @@ public class User {
     private int currentXp = 0;
     private int targetXp = 100;
     private int currentStreak = 0;
+    private LocalDate lastActivityDate;
+
+    // Daily Quests Fields
+    private boolean waterGoalMet = false;
+    private boolean dietGoalMet = false;
+    private boolean workoutGoalMet = false;
+    private LocalDate lastGoalResetDate;
 
     // Bio Fields
     private LocalDate birthDate;
@@ -129,6 +136,46 @@ public class User {
 
     public void setCurrentStreak(int currentStreak) {
         this.currentStreak = currentStreak;
+    }
+
+    public LocalDate getLastActivityDate() {
+        return lastActivityDate;
+    }
+
+    public void setLastActivityDate(LocalDate lastActivityDate) {
+        this.lastActivityDate = lastActivityDate;
+    }
+
+    public boolean isWaterGoalMet() {
+        return waterGoalMet;
+    }
+
+    public void setWaterGoalMet(boolean waterGoalMet) {
+        this.waterGoalMet = waterGoalMet;
+    }
+
+    public boolean isDietGoalMet() {
+        return dietGoalMet;
+    }
+
+    public void setDietGoalMet(boolean dietGoalMet) {
+        this.dietGoalMet = dietGoalMet;
+    }
+
+    public boolean isWorkoutGoalMet() {
+        return workoutGoalMet;
+    }
+
+    public void setWorkoutGoalMet(boolean workoutGoalMet) {
+        this.workoutGoalMet = workoutGoalMet;
+    }
+
+    public LocalDate getLastGoalResetDate() {
+        return lastGoalResetDate;
+    }
+
+    public void setLastGoalResetDate(LocalDate lastGoalResetDate) {
+        this.lastGoalResetDate = lastGoalResetDate;
     }
 
     public LocalDate getBirthDate() {

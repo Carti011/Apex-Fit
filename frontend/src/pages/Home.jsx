@@ -11,6 +11,12 @@ function Home() {
     const { user } = useAuth();
 
     useEffect(() => {
+        // Redirect to dashboard if already logged in
+        if (user) {
+            navigate('/dashboard');
+            return;
+        }
+
         // Ajuste para não duplicar /api/v1 se já estiver na env
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
         fetch(`${apiUrl}/status`)
@@ -20,7 +26,7 @@ function Home() {
                 console.error("Erro ao verificar status:", err);
                 setStatus('Offline 🔴');
             })
-    }, [])
+    }, [user, navigate])
 
     return (
         <div className="app-layout">
