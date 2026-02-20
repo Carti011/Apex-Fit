@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, User, Utensils, LogOut } from 'lucide-react';
+import { Activity, Target, User, Utensils, LogOut } from 'lucide-react';
 import EvolutionPanel from '../components/dashboard/EvolutionPanel';
 import DailyQuests from '../components/dashboard/DailyQuests';
 import BioProfileForm from '../components/dashboard/BioProfileForm';
@@ -81,12 +81,9 @@ const Dashboard = () => {
 
         switch (activeTab) {
             case 'dashboard':
-                return (
-                    <>
-                        <EvolutionPanel user={{ ...user, ...dashboardData }} />
-                        <DailyQuests user={{ ...user, ...dashboardData }} onQuestComplete={handleQuestComplete} />
-                    </>
-                );
+                return <EvolutionPanel user={{ ...user, ...dashboardData }} />;
+            case 'quests':
+                return <DailyQuests user={{ ...user, ...dashboardData }} onQuestComplete={handleQuestComplete} />;
             case 'profile':
                 return <BioProfileForm user={dashboardData} onUpdate={handleProfileUpdate} />;
             case 'diet':
@@ -109,8 +106,16 @@ const Dashboard = () => {
                         className={`sidebar-link ${activeTab === 'dashboard' ? 'active' : ''}`}
                         onClick={() => setActiveTab('dashboard')}
                     >
-                        <LayoutDashboard size={20} />
-                        <span>Dashboard</span>
+                        <Activity size={20} />
+                        <span>Evolução</span>
+                    </button>
+
+                    <button
+                        className={`sidebar-link ${activeTab === 'quests' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('quests')}
+                    >
+                        <Target size={20} />
+                        <span>Missões</span>
                     </button>
 
                     <button

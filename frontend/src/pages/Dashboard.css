@@ -210,10 +210,12 @@
         transform: scale(1);
         filter: drop-shadow(0 0 2px rgba(255, 77, 77, 0.5));
     }
+
     50% {
         transform: scale(1.15);
         filter: drop-shadow(0 0 8px rgba(255, 77, 77, 0.9));
     }
+
     100% {
         transform: scale(1);
         filter: drop-shadow(0 0 2px rgba(255, 77, 77, 0.5));
@@ -230,7 +232,7 @@
         height: auto;
         /* Important to override desktop height: 100vh */
         flex-direction: row;
-        padding: 0.5rem 1rem;
+        padding: 0.8rem 1rem max(1.5rem, env(safe-area-inset-bottom));
         background: rgba(13, 13, 13, 0.95);
         border-top: 1px solid rgba(255, 255, 255, 0.1);
         border-right: none;
