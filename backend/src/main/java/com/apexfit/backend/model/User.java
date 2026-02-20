@@ -34,6 +34,7 @@ public class User {
     private int currentXp = 0;
     private int targetXp = 100;
     private int currentStreak = 0;
+    private LocalDate lastActivityDate;
 
     // Bio Fields
     private LocalDate birthDate;
@@ -129,6 +130,14 @@ public class User {
 
     public void setCurrentStreak(int currentStreak) {
         this.currentStreak = currentStreak;
+    }
+
+    public LocalDate getLastActivityDate() {
+        return lastActivityDate;
+    }
+
+    public void setLastActivityDate(LocalDate lastActivityDate) {
+        this.lastActivityDate = lastActivityDate;
     }
 
     public LocalDate getBirthDate() {

@@ -14,6 +14,8 @@ const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [dashboardData, setDashboardData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [showLevelUp, setShowLevelUp] = useState(false);
+    const [prevLevel, setPrevLevel] = useState(null);
 
     useEffect(() => {
         const fetchDashboardInfo = async () => {
@@ -21,6 +23,7 @@ const Dashboard = () => {
             try {
                 const data = await api.getDashboard(user.token);
                 setDashboardData(data);
+                if (data.level) setPrevLevel(data.level);
             } catch (error) {
                 console.error("Erro ao carregar dashboard", error);
             } finally {
@@ -39,6 +42,13 @@ const Dashboard = () => {
     const handleProfileUpdate = async (bioPayload) => {
         try {
             const updatedData = await api.updateBioProfile(user.token, bioPayload);
+
+            // Check for Level Up!
+            if (prevLevel && updatedData.level > prevLevel) {
+                setShowLevelUp(true);
+            }
+
+            setPrevLevel(updatedData.level);
             setDashboardData(updatedData);
             alert("Perfil salvo com sucesso!");
             setActiveTab('diet'); // Redireciona para a aba de dieta para ver os resultados
@@ -125,6 +135,43 @@ const Dashboard = () => {
                     {renderContent()}
                 </div>
             </main>
+
+            {/* Level Up Toast Notification */}
+            {showLevelUp && (
+                <div className="level-up-toast fade-in" style={{
+                    position: 'fixed',
+                    bottom: '2rem',
+                    right: '2rem',
+                    background: 'linear-gradient(135deg, var(--gold), #ffb703)',
+                    color: '#000',
+                    padding: '1.5rem',
+                    borderRadius: 'var(--radius)',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    zIndex: 1000
+                }}>
+                    <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800 }}>LEVEL UP! 🚀</h3>
+                    <p style={{ margin: 0, fontWeight: 600 }}>Você alcançou o Nível {user?.level}</p>
+                    <button
+                        onClick={() => setShowLevelUp(false)}
+                        style={{
+                            marginTop: '0.5rem',
+                            padding: '0.5rem 1rem',
+                            background: '#000',
+                            color: 'var(--gold)',
+                            border: 'none',
+                            borderRadius: '20px',
+                            cursor: 'pointer',
+                            fontWeight: 'bold'
+                        }}
+                    >
+                        Incrível!
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

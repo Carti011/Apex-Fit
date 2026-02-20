@@ -32,7 +32,7 @@ const EvolutionPanel = ({ user }) => {
                 <div className="stat-card glass">
                     <div className="stat-header">
                         <span className="stat-label">Ofensiva</span>
-                        <Flame size={20} className="highlight" />
+                        <Flame size={20} className={user?.currentStreak > 0 ? "highlight pulse-animation" : "highlight"} style={user?.currentStreak > 0 ? { color: '#ff4d4d' } : {}} />
                     </div>
                     <div className="stat-value">{user?.currentStreak || 0} <span className="stat-unit">dias</span></div>
                     <div className="stat-sub">Não quebre o ritmo!</div>
