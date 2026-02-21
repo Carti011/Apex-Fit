@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, User, Utensils, LogOut } from 'lucide-react';
+import { Activity, Target, User, Utensils, LogOut } from 'lucide-react';
 import EvolutionPanel from '../components/dashboard/EvolutionPanel';
+import DailyQuests from '../components/dashboard/DailyQuests';
 import BioProfileForm from '../components/dashboard/BioProfileForm';
 import NutritionPlan from '../components/dashboard/NutritionPlan';
 import { api } from '../services/api';
@@ -14,6 +15,8 @@ const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [dashboardData, setDashboardData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [showLevelUp, setShowLevelUp] = useState(false);
+    const [prevLevel, setPrevLevel] = useState(null);
 
     useEffect(() => {
         const fetchDashboardInfo = async () => {
@@ -21,6 +24,7 @@ const Dashboard = () => {
             try {
                 const data = await api.getDashboard(user.token);
                 setDashboardData(data);
+                if (data.level) setPrevLevel(data.level);
             } catch (error) {
                 console.error("Erro ao carregar dashboard", error);
             } finally {
@@ -39,6 +43,13 @@ const Dashboard = () => {
     const handleProfileUpdate = async (bioPayload) => {
         try {
             const updatedData = await api.updateBioProfile(user.token, bioPayload);
+
+            // Check for Level Up!
+            if (prevLevel && updatedData.level > prevLevel) {
+                setShowLevelUp(true);
+            }
+
+            setPrevLevel(updatedData.level);
             setDashboardData(updatedData);
             alert("Perfil salvo com sucesso!");
             setActiveTab('diet'); // Redireciona para a aba de dieta para ver os resultados
@@ -48,13 +59,31 @@ const Dashboard = () => {
         }
     };
 
+    const handleQuestComplete = async (questType) => {
+        try {
+            const updatedData = await api.completeQuest(user.token, questType);
+
+            // Check for Level Up
+            if (prevLevel && updatedData.level > prevLevel) {
+                setShowLevelUp(true);
+            }
+
+            setPrevLevel(updatedData.level);
+            setDashboardData(updatedData);
+        } catch (error) {
+            alert("Erro ao concluir missão");
+            console.error(error);
+        }
+    };
+
     const renderContent = () => {
         if (loading) return <div style={{ color: 'white', textAlign: 'center', padding: '2rem' }}>Carregando seus dados...</div>;
 
         switch (activeTab) {
             case 'dashboard':
-                // Temporarily mixing user auth data with dashboard gamification data
                 return <EvolutionPanel user={{ ...user, ...dashboardData }} />;
+            case 'quests':
+                return <DailyQuests user={{ ...user, ...dashboardData }} onQuestComplete={handleQuestComplete} />;
             case 'profile':
                 return <BioProfileForm user={dashboardData} onUpdate={handleProfileUpdate} />;
             case 'diet':
@@ -77,8 +106,16 @@ const Dashboard = () => {
                         className={`sidebar-link ${activeTab === 'dashboard' ? 'active' : ''}`}
                         onClick={() => setActiveTab('dashboard')}
                     >
-                        <LayoutDashboard size={20} />
-                        <span>Dashboard</span>
+                        <Activity size={20} />
+                        <span>Evolução</span>
+                    </button>
+
+                    <button
+                        className={`sidebar-link ${activeTab === 'quests' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('quests')}
+                    >
+                        <Target size={20} />
+                        <span>Missões</span>
                     </button>
 
                     <button
@@ -119,12 +156,33 @@ const Dashboard = () => {
                             <span className="user-level">Nível {user?.level || 1} • Iniciante</span>
                         </div>
                     </div>
+                    {/* Logout Button (Visible only on mobile via CSS) */}
+                    <button className="mobile-logout-btn" onClick={handleLogout} aria-label="Sair">
+                        <LogOut size={24} />
+                    </button>
                 </header>
 
                 <div className="dashboard-content">
                     {renderContent()}
                 </div>
             </main>
+
+            {/* Level Up Modal Notification */}
+            {showLevelUp && (
+                <div className="level-up-overlay">
+                    <div className="level-up-modal slide-up-bounce">
+                        <div className="level-up-icon">⭐</div>
+                        <h3 className="level-up-title">LEVEL UP! 🚀</h3>
+                        <p className="level-up-text">Você alcançou o Nível <span className="highlight-level">{user?.level}</span></p>
+                        <button
+                            className="level-up-btn"
+                            onClick={() => setShowLevelUp(false)}
+                        >
+                            Incrível!
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -38,7 +38,7 @@ const BioProfileForm = ({ user, onUpdate }) => {
             <div className="glass" style={{ padding: '2rem' }}>
                 <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
                         <div className="form-group">
                             <label>Data de Nascimento</label>
                             <input

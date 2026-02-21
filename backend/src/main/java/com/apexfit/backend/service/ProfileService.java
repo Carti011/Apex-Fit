@@ -10,55 +10,72 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProfileService {
 
-    private final UserRepository userRepository;
-    private final CalculatorService calculatorService;
+        private final UserRepository userRepository;
+        private final CalculatorService calculatorService;
+        private final GamificationService gamificationService;
 
-    public ProfileService(UserRepository userRepository, CalculatorService calculatorService) {
-        this.userRepository = userRepository;
-        this.calculatorService = calculatorService;
-    }
+        public ProfileService(UserRepository userRepository, CalculatorService calculatorService,
+                        GamificationService gamificationService) {
+                this.userRepository = userRepository;
+                this.calculatorService = calculatorService;
+                this.gamificationService = gamificationService;
+        }
 
-    public DashboardDataDTO updateBioProfile(String email, BioProfileDTO bioDto) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        public DashboardDataDTO updateBioProfile(String email, BioProfileDTO bioDto) {
+                User user = userRepository.findByEmail(email)
+                                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        user.setBirthDate(bioDto.birthDate());
-        user.setWeight(bioDto.weight());
-        user.setHeight(bioDto.height());
-        user.setGender(bioDto.gender());
-        user.setBodyFatPercentage(bioDto.bodyFatPercentage());
-        user.setActivityLevel(bioDto.activityLevel());
-        user.setGoal(bioDto.goal());
+                boolean isFirstTimeSetup = (user.getWeight() == null); // Reward for initial setup
 
-        user = userRepository.save(user);
+                user.setBirthDate(bioDto.birthDate());
+                user.setWeight(bioDto.weight());
+                user.setHeight(bioDto.height());
+                user.setGender(bioDto.gender());
+                user.setBodyFatPercentage(bioDto.bodyFatPercentage());
+                user.setActivityLevel(bioDto.activityLevel());
+                user.setGoal(bioDto.goal());
 
-        return getDashboardData(user);
-    }
+                // Grant 50 XP if they are setting up their profile for the first time
+                if (isFirstTimeSetup) {
+                        user = gamificationService.addXp(user, 50);
+                } else {
+                        user = userRepository.save(user);
+                }
 
-    public DashboardDataDTO getDashboardDataByEmail(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        return getDashboardData(user);
-    }
+                return getDashboardData(user);
+        }
 
-    private DashboardDataDTO getDashboardData(User user) {
-        BioProfileDTO bio = new BioProfileDTO(
-                user.getBirthDate(),
-                user.getWeight(),
-                user.getHeight(),
-                user.getGender(),
-                user.getBodyFatPercentage(),
-                user.getActivityLevel(),
-                user.getGoal());
+        public DashboardDataDTO getDashboardDataByEmail(String email) {
+                User user = userRepository.findByEmail(email)
+                                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        NutritionPlanDTO nutrition = calculatorService.calculate(user);
+                // Process daily activity (Streak + Daily Login XP)
+                user = gamificationService.processDailyActivity(user);
 
-        return new DashboardDataDTO(
-                user.getLevel(),
-                user.getCurrentXp(),
-                user.getTargetXp(),
-                user.getCurrentStreak(),
-                bio,
-                nutrition);
-    }
+                return getDashboardData(user);
+        }
+
+        private DashboardDataDTO getDashboardData(User user) {
+                BioProfileDTO bio = new BioProfileDTO(
+                                user.getBirthDate(),
+                                user.getWeight(),
+                                user.getHeight(),
+                                user.getGender(),
+                                user.getBodyFatPercentage(),
+                                user.getActivityLevel(),
+                                user.getGoal());
+
+                NutritionPlanDTO nutrition = calculatorService.calculate(user);
+
+                return new DashboardDataDTO(
+                                user.getLevel(),
+                                user.getCurrentXp(),
+                                user.getTargetXp(),
+                                user.getCurrentStreak(),
+                                user.isWaterGoalMet(),
+                                user.isDietGoalMet(),
+                                user.isWorkoutGoalMet(),
+                                bio,
+                                nutrition);
+        }
 }
