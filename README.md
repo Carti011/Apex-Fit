@@ -7,7 +7,7 @@ Bem-vindo ao repositório oficial do **Apex Fit**. Este projeto é uma aplicaç�
 O projeto orquestrado em um Monorepo utilizando as seguintes tecnologias:
 
 ### Backend (`/backend`)
-- **Java 17+**
+- **Java 21**
 - **Spring Boot 3**
 - **Spring Data JPA** (Persistência)
 - **PostgreSQL** (Banco de Dados)
@@ -22,7 +22,7 @@ O projeto orquestrado em um Monorepo utilizando as seguintes tecnologias:
 
 ### Pré-requisitos
 - Docker Desktop instalado e rodando.
-- Java 17 instalado.
+- Java 21 instalado.
 - Node.js instalado.
 
 ### Passo 1: Iniciar o Banco de Dados
