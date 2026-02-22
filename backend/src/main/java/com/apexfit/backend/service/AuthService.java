@@ -31,25 +31,29 @@ public class AuthService {
     }
 
     public User register(RegisterDTO data) {
-        if (userRepository.existsByEmail(data.getEmail())) {
+        String email = data.getEmail() != null ? data.getEmail().toLowerCase() : null;
+
+        if (userRepository.existsByEmail(email)) {
             throw new EmailAlreadyExistsException("Email já cadastrado");
         }
 
         User newUser = new User(
                 data.getName(),
-                data.getEmail(),
+                email,
                 passwordEncoder.encode(data.getPassword()));
 
         return userRepository.save(newUser);
     }
 
     public AuthResponseDTO login(LoginDTO data) {
+        String email = data.email() != null ? data.email().toLowerCase() : null;
+
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(data.email(), data.password()));
+                new UsernamePasswordAuthenticationToken(email, data.password()));
 
         String token = jwtTokenProvider.generateToken(authentication);
 
-        User user = userRepository.findByEmail(data.email())
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return new AuthResponseDTO(token, user.getName(), user.getEmail());
