@@ -2,7 +2,7 @@ import { Trophy, Flame, Target } from 'lucide-react';
 import WeeklyChart from './WeeklyChart';
 import '../../App.css';
 
-const EvolutionPanel = ({ user }) => {
+const EvolutionPanel = ({ user, onNavigate }) => {
     const getLeagueInfo = (level) => {
         switch (level) {
             case 1: return { name: 'Bronze', color: '#cd7f32', min: 0, max: 3000 };
@@ -31,8 +31,12 @@ const EvolutionPanel = ({ user }) => {
             </h2>
 
             <div className="stats-grid">
-                {/* Card XP e Progresso */}
-                <div className="stat-card glass" style={{ borderColor: league.color, boxShadow: `0 8px 32px 0 ${league.color}15` }}>
+                {/* Card XP e Progresso (Clicável no Futuro - Modal Liga) */}
+                <div
+                    className="stat-card glass interactive-card"
+                    style={{ borderColor: league.color, boxShadow: `0 8px 32px 0 ${league.color}15`, cursor: 'pointer' }}
+                    onClick={() => alert("Em breve: Modal visualizando todas as Ligas (Bronze > Diamante)!")}
+                >
                     <div className="stat-header">
                         <span className="stat-label" style={{ color: league.color, fontWeight: 'bold' }}>{league.name}</span>
                         <Trophy size={20} style={{ color: league.color }} />
@@ -71,8 +75,12 @@ const EvolutionPanel = ({ user }) => {
                     </div>
                 </div>
 
-                {/* Card Meta Status */}
-                <div className="stat-card glass">
+                {/* Card Meta Status (Clicável - Vai para Quests) */}
+                <div
+                    className="stat-card glass interactive-card"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => onNavigate && onNavigate('quests')}
+                >
                     <div className="stat-header">
                         <span className="stat-label">Missões Fixas</span>
                         <Target size={20} className="highlight" />
@@ -81,7 +89,7 @@ const EvolutionPanel = ({ user }) => {
                         Diárias
                     </div>
                     <div className="stat-sub" style={{ marginTop: '0.5rem' }}>
-                        Complete para subir no Rank!
+                        Clique para ir às Missões
                     </div>
                 </div>
             </div>
