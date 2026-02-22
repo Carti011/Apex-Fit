@@ -81,7 +81,7 @@ const Dashboard = () => {
 
         switch (activeTab) {
             case 'dashboard':
-                return <EvolutionPanel user={{ ...user, ...dashboardData }} />;
+                return <EvolutionPanel user={{ ...user, ...dashboardData }} onNavigate={setActiveTab} />;
             case 'quests':
                 return <DailyQuests user={{ ...user, ...dashboardData }} onQuestComplete={handleQuestComplete} />;
             case 'profile':
@@ -89,7 +89,7 @@ const Dashboard = () => {
             case 'diet':
                 return <NutritionPlan nutrition={dashboardData?.nutritionPlan} />;
             default:
-                return <EvolutionPanel user={{ ...user, ...dashboardData }} />;
+                return <EvolutionPanel user={{ ...user, ...dashboardData }} onNavigate={setActiveTab} />;
         }
     };
 

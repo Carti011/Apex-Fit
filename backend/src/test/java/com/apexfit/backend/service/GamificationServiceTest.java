@@ -42,7 +42,7 @@ class GamificationServiceTest {
         testUser.setEmail("test@email.com");
         testUser.setCurrentXp(0);
         testUser.setLevel(1);
-        testUser.setTargetXp(100);
+        testUser.setTargetXp(3000);
         testUser.setCurrentStreak(0);
         testUser.setWaterGoalMet(false);
         testUser.setDietGoalMet(false);
@@ -58,20 +58,21 @@ class GamificationServiceTest {
 
         assertEquals(50, updatedUser.getCurrentXp());
         assertEquals(1, updatedUser.getLevel());
+        assertEquals(3000, updatedUser.getTargetXp());
         verify(xpHistoryRepository, times(1)).save(any(XpHistory.class));
     }
 
     @Test
     void shouldAddXpAndLevelUp() {
-        testUser.setCurrentXp(80);
+        testUser.setCurrentXp(2980);
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArguments()[0]);
         when(xpHistoryRepository.findByUserAndDate(any(User.class), any(LocalDate.class))).thenReturn(Optional.empty());
 
         User updatedUser = gamificationService.addXp(testUser, 50);
 
-        assertEquals(30, updatedUser.getCurrentXp()); // 80 + 50 = 130 - 100 = 30
+        assertEquals(3030, updatedUser.getCurrentXp());
         assertEquals(2, updatedUser.getLevel());
-        assertEquals(200, updatedUser.getTargetXp());
+        assertEquals(10000, updatedUser.getTargetXp());
     }
 
     @Test

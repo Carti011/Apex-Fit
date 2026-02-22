@@ -1,13 +1,14 @@
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import App from './App';
 import { describe, it, expect } from 'vitest';
 
-describe('App', () => {
-    it('renders correctly', () => {
-        // Renderiza o componente principal (pode falhar se tiver rotas não mockadas, mas serve de teste inicial)
-        // Se falhar, ajustaremos para renderizar um componente mais simples ou mockar o Router.
-        // render(<App />);
-        // Por enquanto, testaremos algo genérico para validar o Vitest
-        expect(true).toBe(true);
+describe('App Root Component', () => {
+    it('renders the main application routing without crashing', () => {
+        // Render the root component that injects Router and AuthProvider
+        const { container } = render(<App />);
+        
+        // Assert that the container correctly caught the DOM tree rendering
+        expect(container).toBeTruthy();
+        expect(container.firstChild).toBeDefined();
     });
 });

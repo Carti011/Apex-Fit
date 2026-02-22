@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.List;
+import java.util.ArrayList;
 
 import com.apexfit.backend.model.enums.ActivityLevel;
 import com.apexfit.backend.model.enums.Gender;
@@ -36,11 +38,28 @@ public class User {
     private int currentStreak = 0;
     private LocalDate lastActivityDate;
 
+    // Relacionamentos Gamificacao e Social
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "league_id")
+    private League league;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "squad_id")
+    private Squad squad;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "academy_id")
+    private Academy academy;
+
     // Daily Quests Fields
     private boolean waterGoalMet = false;
     private boolean dietGoalMet = false;
     private boolean workoutGoalMet = false;
     private LocalDate lastGoalResetDate;
+
+    // Histórico de Gamificacão (Cascade Deleção)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<XpHistory> xpHistories = new ArrayList<>();
 
     // Bio Fields
     private LocalDate birthDate;
@@ -144,6 +163,30 @@ public class User {
 
     public void setLastActivityDate(LocalDate lastActivityDate) {
         this.lastActivityDate = lastActivityDate;
+    }
+
+    public League getLeague() {
+        return league;
+    }
+
+    public void setLeague(League league) {
+        this.league = league;
+    }
+
+    public Squad getSquad() {
+        return squad;
+    }
+
+    public void setSquad(Squad squad) {
+        this.squad = squad;
+    }
+
+    public Academy getAcademy() {
+        return academy;
+    }
+
+    public void setAcademy(Academy academy) {
+        this.academy = academy;
     }
 
     public boolean isWaterGoalMet() {

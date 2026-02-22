@@ -28,15 +28,27 @@ public class GamificationService {
             return user;
 
         int newXp = user.getCurrentXp() + amount;
+        user.setCurrentXp(newXp);
 
-        // Handle potential multiple level ups
-        while (newXp >= user.getTargetXp()) {
-            newXp -= user.getTargetXp();
-            user.setLevel(user.getLevel() + 1);
-            user.setTargetXp(user.getLevel() * 100); // Level 1 -> 100, Level 2 -> 200...
+        // Fixed XP Tiers:
+        // 1 (Bronze): 0 -> 2999
+        // 2 (Prata): 3000 -> 9999
+        // 3 (Ouro): 10000 -> 49999
+        // 4 (Diamante): >= 50000
+        if (newXp >= 50000) {
+            user.setLevel(4);
+            user.setTargetXp(newXp); // No further target
+        } else if (newXp >= 10000) {
+            user.setLevel(3);
+            user.setTargetXp(50000);
+        } else if (newXp >= 3000) {
+            user.setLevel(2);
+            user.setTargetXp(10000);
+        } else {
+            user.setLevel(1);
+            user.setTargetXp(3000);
         }
 
-        user.setCurrentXp(newXp);
         user = userRepository.save(user);
 
         // Track Daily XP Gain
