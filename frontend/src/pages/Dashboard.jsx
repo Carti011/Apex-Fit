@@ -47,6 +47,16 @@ const Dashboard = () => {
     const percent = Math.min(100, (progressInLevel / gap) * 100);
 
 
+    // Level Progress Math
+    const level = user?.level || 1;
+    const currentXp = user?.currentXp || 0;
+    const targetXp = user?.targetXp || 100;
+    const gap = level * 100;
+    const base = targetXp - gap;
+    const progressInLevel = Math.max(0, currentXp - base);
+    const percent = Math.min(100, (progressInLevel / gap) * 100);
+
+
     useEffect(() => {
         const fetchDashboardInfo = async () => {
             if (!user || !user.token) return;
@@ -271,6 +281,7 @@ const Dashboard = () => {
                                 { min: 100, max: '∞', title: '🏆 Lenda do Apex Fit' }
                             ].map((tier) => {
                                 const isCurrent = level >= tier.min && (tier.max === '∞' || level <= tier.max);
+                                const isCurrent = (user?.level || 1) >= tier.min && (tier.max === '∞' || (user?.level || 1) <= tier.max);
                                 return (
                                     <div key={tier.title} className={`league-tier ${isCurrent ? 'current' : ''}`} style={isCurrent ? { borderColor: 'var(--accent-color)' } : { padding: '0.8rem 1rem' }}>
                                         <div className="league-tier-info" style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>

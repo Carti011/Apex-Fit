@@ -579,5 +579,7 @@
     /* Prevent Toast from overlapping mobile navigation */
     .premium-toast {
         bottom: 110px;
+    .leagues-modal {
+        margin-top: -20px;
     }
 }
