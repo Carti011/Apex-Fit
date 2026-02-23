@@ -44,8 +44,7 @@ const EvolutionPanel = ({ user, onNavigate }) => {
                         <span className="stat-label" style={{ color: league.color, fontWeight: 'bold' }}>{league.name}</span>
                         <Trophy size={20} style={{ color: league.color }} />
                     </div>
-                    <div className="stat-value">{current} <span className="stat-unit">XP</span></div>
-                    <div className="stat-sub">Nível {user?.level || 1}</div>
+                    <div className="stat-value">{current} <span className="stat-unit">XP Ranqueado</span></div>
 
                     <div className="xp-progress-container" style={{ marginTop: '1rem', height: '10px', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '10px', overflow: 'hidden' }}>
                         <div

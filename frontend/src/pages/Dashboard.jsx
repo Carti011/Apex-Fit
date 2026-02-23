@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Activity, Target, User, Utensils, LogOut, ShieldCheck } from 'lucide-react';
+import { Activity, Target, User, Utensils, LogOut, ShieldCheck, X } from 'lucide-react';
 import EvolutionPanel from '../components/dashboard/EvolutionPanel';
 import DailyQuests from '../components/dashboard/DailyQuests';
 import BioProfileForm from '../components/dashboard/BioProfileForm';
@@ -10,6 +10,14 @@ import AccountSettings from '../components/dashboard/AccountSettings';
 import { api } from '../services/api';
 import './Dashboard.css';
 
+const getUserTitle = (level) => {
+    if (level >= 100) return '🏆 Lenda do Apex Fit';
+    if (level >= 50) return '👑 Elite';
+    if (level >= 25) return '🏋️ Atleta Focado';
+    if (level >= 10) return '🏃 Amador';
+    return '🌱 Iniciante';
+};
+
 const Dashboard = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
@@ -17,7 +25,18 @@ const Dashboard = () => {
     const [dashboardData, setDashboardData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showLevelUp, setShowLevelUp] = useState(false);
+    const [showTitlesModal, setShowTitlesModal] = useState(false);
     const [prevLevel, setPrevLevel] = useState(null);
+
+    // Level Progress Math
+    const level = user?.level || 1;
+    const currentXp = user?.currentXp || 0;
+    const targetXp = user?.targetXp || 100;
+    const gap = level * 100;
+    const base = targetXp - gap;
+    const progressInLevel = Math.max(0, currentXp - base);
+    const percent = Math.min(100, (progressInLevel / gap) * 100);
+
 
     useEffect(() => {
         const fetchDashboardInfo = async () => {
@@ -170,9 +189,25 @@ const Dashboard = () => {
                         <div className="avatar-placeholder">
                             {user?.name?.charAt(0) || 'U'}
                         </div>
-                        <div>
-                            <h3>Bem-vindo, {user?.name}</h3>
-                            <span className="user-level">Nível {user?.level || 1} • Iniciante</span>
+                        <div style={{ flex: 1 }}>
+                            <h3 style={{ margin: '0 0 0.2rem 0' }}>Bem-vindo, {user?.name}</h3>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setShowTitlesModal(true); }}
+                                style={{ background: 'transparent', border: 'none', padding: 0, margin: '0 0 0.5rem 0', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit', display: 'block' }}
+                            >
+                                <span className="user-level" style={{ textDecoration: 'underline', textDecorationStyle: 'dotted', textUnderlineOffset: '4px', display: 'inline-block' }}>
+                                    Nível {level} • {getUserTitle(level)}
+                                </span>
+                            </button>
+                            {/* Tiny Progress Bar */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <div style={{ flex: 1, height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
+                                    <div style={{ width: `${percent}%`, height: '100%', background: 'var(--accent-color)', borderRadius: '4px', transition: 'width 0.5s ease-out' }} />
+                                </div>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 'bold' }}>
+                                    {progressInLevel} / {gap} XP
+                                </span>
+                            </div>
                         </div>
                     </div>
                     {/* Logout Button (Visible only on mobile via CSS) */}
@@ -198,6 +233,46 @@ const Dashboard = () => {
                             onClick={() => setShowLevelUp(false)}
                         >
                             Incrível!
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Account Titles Modal Notification */}
+            {showTitlesModal && (
+                <div className="level-up-overlay" onClick={() => setShowTitlesModal(false)}>
+                    <div className="leagues-modal slide-up-bounce" onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                            <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', margin: 0, color: 'white' }}>Nível da Conta</h3>
+                            <button onClick={() => setShowTitlesModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex' }}>
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                            Diferente das Patentes (Ranks), o Nível da Conta acumula toda a sua jornada e nunca cai. Continue treinando para forjar seu título!
+                        </p>
+
+                        <div className="league-tiers-list">
+                            {[
+                                { min: 1, max: 9, title: '🌱 Iniciante' },
+                                { min: 10, max: 24, title: '🏃 Amador' },
+                                { min: 25, max: 49, title: '🏋️ Atleta Focado' },
+                                { min: 50, max: 99, title: '👑 Elite' },
+                                { min: 100, max: '∞', title: '🏆 Lenda do Apex Fit' }
+                            ].map((tier) => {
+                                const isCurrent = (user?.level || 1) >= tier.min && (tier.max === '∞' || (user?.level || 1) <= tier.max);
+                                return (
+                                    <div key={tier.title} className={`league-tier ${isCurrent ? 'current' : ''}`} style={isCurrent ? { borderColor: 'var(--accent-color)' } : { padding: '0.8rem 1rem' }}>
+                                        <div className="league-tier-info" style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                                            <div className="league-tier-name" style={{ margin: 0, fontSize: '1.1rem', color: isCurrent ? 'var(--accent-color)' : 'white' }}>{tier.title}</div>
+                                            <div className="league-tier-xp" style={{ color: 'var(--text-secondary)' }}>Nível {tier.min}{tier.max !== '∞' ? ` ao ${tier.max}` : '+'}</div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        <button className="close-modal-btn" onClick={() => setShowTitlesModal(false)}>
+                            Impressionante
                         </button>
                     </div>
                 </div>
