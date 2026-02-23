@@ -71,6 +71,24 @@ export const api = {
         return response.json();
     },
 
+    updateAccountProfile: async (token, accountData) => {
+        const response = await fetch(`${API_URL}/profile/account`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(accountData),
+        });
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.message || 'Falha ao atualizar configurações da conta');
+        }
+
+        return response.json();
+    },
+
     completeQuest: async (token, questType) => {
         const response = await fetch(`${API_URL}/gamification/quests/complete?questType=${questType}`, {
             method: 'POST',

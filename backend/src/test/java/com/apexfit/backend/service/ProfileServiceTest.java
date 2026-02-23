@@ -3,6 +3,7 @@ package com.apexfit.backend.service;
 import com.apexfit.backend.dto.BioProfileDTO;
 import com.apexfit.backend.dto.DashboardDataDTO;
 import com.apexfit.backend.dto.NutritionPlanDTO;
+import com.apexfit.backend.dto.AccountUpdateDTO;
 import com.apexfit.backend.model.User;
 import com.apexfit.backend.model.enums.ActivityLevel;
 import com.apexfit.backend.model.enums.Gender;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -34,6 +36,9 @@ class ProfileServiceTest {
 
     @Mock
     private GamificationService gamificationService;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private ProfileService profileService;
@@ -104,5 +109,52 @@ class ProfileServiceTest {
         assertEquals(0, result.currentXp());
         assertNotNull(result.nutritionPlan());
         verify(gamificationService, times(1)).processDailyActivity(any(User.class));
+    }
+
+    @Test
+    void shouldUpdateAccountProfileNameOnly() {
+        when(userRepository.findByEmail(testUser.getEmail())).thenReturn(Optional.of(testUser));
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArguments()[0]);
+        when(calculatorService.calculate(any(User.class))).thenReturn(mockNutrition);
+
+        AccountUpdateDTO dto = new AccountUpdateDTO("New Name", null, null);
+        DashboardDataDTO result = profileService.updateAccountProfile("test@email.com", dto);
+
+        assertNotNull(result);
+        assertEquals("New Name", testUser.getName());
+        verify(passwordEncoder, never()).matches(anyString(), anyString());
+        verify(userRepository, times(1)).save(any(User.class));
+    }
+
+    @Test
+    void shouldUpdateAccountProfilePassword() {
+        testUser.setPassword("encodedOldPassword");
+        when(userRepository.findByEmail(testUser.getEmail())).thenReturn(Optional.of(testUser));
+        when(passwordEncoder.matches("oldPassword", "encodedOldPassword")).thenReturn(true);
+        when(passwordEncoder.encode("newPassword")).thenReturn("encodedNewPassword");
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArguments()[0]);
+        when(calculatorService.calculate(any(User.class))).thenReturn(mockNutrition);
+
+        AccountUpdateDTO dto = new AccountUpdateDTO(null, "oldPassword", "newPassword");
+        DashboardDataDTO result = profileService.updateAccountProfile("test@email.com", dto);
+
+        assertNotNull(result);
+        assertEquals("encodedNewPassword", testUser.getPassword());
+        verify(userRepository, times(1)).save(any(User.class));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUpdateAccountProfileWithWrongPassword() {
+        testUser.setPassword("encodedOldPassword");
+        when(userRepository.findByEmail(testUser.getEmail())).thenReturn(Optional.of(testUser));
+        when(passwordEncoder.matches("wrongOldPassword", "encodedOldPassword")).thenReturn(false);
+
+        AccountUpdateDTO dto = new AccountUpdateDTO(null, "wrongOldPassword", "newPassword");
+
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> {
+            profileService.updateAccountProfile("test@email.com", dto);
+        });
+
+        verify(userRepository, never()).save(any(User.class));
     }
 }

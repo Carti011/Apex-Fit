@@ -30,4 +30,12 @@ public class ProfileController {
         String email = authentication.getName();
         return ResponseEntity.ok(profileService.updateBioProfile(email, bioDto));
     }
+
+    @PutMapping("/account")
+    public ResponseEntity<DashboardDataDTO> updateAccountProfile(
+            Authentication authentication,
+            @RequestBody com.apexfit.backend.dto.AccountUpdateDTO accountDto) {
+        String email = authentication.getName();
+        return ResponseEntity.ok(profileService.updateAccountProfile(email, accountDto));
+    }
 }

@@ -6,6 +6,8 @@ import com.apexfit.backend.dto.NutritionPlanDTO;
 import com.apexfit.backend.model.User;
 import com.apexfit.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import com.apexfit.backend.dto.AccountUpdateDTO;
 
 @Service
 public class ProfileService {
@@ -13,12 +15,35 @@ public class ProfileService {
         private final UserRepository userRepository;
         private final CalculatorService calculatorService;
         private final GamificationService gamificationService;
+        private final PasswordEncoder passwordEncoder;
 
         public ProfileService(UserRepository userRepository, CalculatorService calculatorService,
-                        GamificationService gamificationService) {
+                        GamificationService gamificationService, PasswordEncoder passwordEncoder) {
                 this.userRepository = userRepository;
                 this.calculatorService = calculatorService;
                 this.gamificationService = gamificationService;
+                this.passwordEncoder = passwordEncoder;
+        }
+
+        public DashboardDataDTO updateAccountProfile(String email, AccountUpdateDTO accountDto) {
+                User user = userRepository.findByEmail(email)
+                                .orElseThrow(() -> new RuntimeException("User not found"));
+
+                if (accountDto.getName() != null && !accountDto.getName().isBlank()) {
+                        user.setName(accountDto.getName());
+                }
+
+                if (accountDto.getNewPassword() != null && !accountDto.getNewPassword().isBlank()) {
+                        if (accountDto.getCurrentPassword() == null || !passwordEncoder
+                                        .matches(accountDto.getCurrentPassword(), user.getPassword())) {
+                                throw new RuntimeException("Senha atual incorreta.");
+                        }
+                        user.setPassword(passwordEncoder.encode(accountDto.getNewPassword()));
+                }
+
+                user = userRepository.save(user);
+
+                return getDashboardData(user);
         }
 
         public DashboardDataDTO updateBioProfile(String email, BioProfileDTO bioDto) {
@@ -68,6 +93,8 @@ public class ProfileService {
                 NutritionPlanDTO nutrition = calculatorService.calculate(user);
 
                 return new DashboardDataDTO(
+                                user.getName(),
+                                user.getEmail(),
                                 user.getLevel(),
                                 user.getCurrentXp(),
                                 user.getTargetXp(),

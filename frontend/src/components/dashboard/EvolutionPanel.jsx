@@ -1,8 +1,11 @@
-import { Trophy, Flame, Target } from 'lucide-react';
+import React, { useState } from 'react';
+import { Trophy, Flame, Target, X } from 'lucide-react';
 import WeeklyChart from './WeeklyChart';
 import '../../App.css';
 
 const EvolutionPanel = ({ user, onNavigate }) => {
+    const [showLeagues, setShowLeagues] = useState(false);
+
     const getLeagueInfo = (level) => {
         switch (level) {
             case 1: return { name: 'Bronze', color: '#cd7f32', min: 0, max: 3000 };
@@ -35,7 +38,7 @@ const EvolutionPanel = ({ user, onNavigate }) => {
                 <div
                     className="stat-card glass interactive-card"
                     style={{ borderColor: league.color, boxShadow: `0 8px 32px 0 ${league.color}15`, cursor: 'pointer' }}
-                    onClick={() => alert("Em breve: Modal visualizando todas as Ligas (Bronze > Diamante)!")}
+                    onClick={() => setShowLeagues(true)}
                 >
                     <div className="stat-header">
                         <span className="stat-label" style={{ color: league.color, fontWeight: 'bold' }}>{league.name}</span>
@@ -78,7 +81,11 @@ const EvolutionPanel = ({ user, onNavigate }) => {
                 {/* Card Meta Status (Clicável - Vai para Quests) */}
                 <div
                     className="stat-card glass interactive-card"
-                    style={{ cursor: 'pointer' }}
+                    style={{
+                        cursor: 'pointer',
+                        borderColor: 'var(--primary-color, #00ff88)',
+                        boxShadow: '0 8px 32px 0 rgba(0, 255, 136, 0.12)'
+                    }}
                     onClick={() => onNavigate && onNavigate('quests')}
                 >
                     <div className="stat-header">
@@ -100,6 +107,51 @@ const EvolutionPanel = ({ user, onNavigate }) => {
                     <WeeklyChart />
                 </div>
             </div>
+
+            {/* Modal de Ligas */}
+            {showLeagues && (
+                <div className="level-up-overlay" onClick={() => setShowLeagues(false)}>
+                    <div className="leagues-modal slide-up-bounce" onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                            <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', margin: 0, color: 'white' }}>Ligas de Rank</h3>
+                            <button onClick={() => setShowLeagues(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex' }}>
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                            Acumule XP para subir de liga e obter mais reconhecimento. Mantenha a ofensiva!
+                        </p>
+
+                        <div className="league-tiers-list">
+                            {[
+                                { level: 1, name: 'Bronze', color: '#cd7f32', desc: '0 - 3.000 XP' },
+                                { level: 2, name: 'Prata', color: '#c0c0c0', desc: '3.000 - 10.000 XP' },
+                                { level: 3, name: 'Ouro', color: '#ffd700', desc: '10.000 - 50.000 XP' },
+                                { level: 4, name: 'Diamante', color: '#b9f2ff', desc: '50.000+ XP Máximo' }
+                            ].map((tier) => (
+                                <div key={tier.name} className={`league-tier ${user?.level === tier.level ? 'current' : ''}`} style={user?.level === tier.level ? { borderColor: tier.color } : {}}>
+                                    <div className="league-tier-icon">
+                                        <Trophy size={24} style={{ color: tier.color }} />
+                                    </div>
+                                    <div className="league-tier-info">
+                                        <div className="league-tier-name" style={{ color: tier.color }}>{tier.name}</div>
+                                        <div className="league-tier-xp">{tier.desc}</div>
+                                    </div>
+                                    {user?.level === tier.level && (
+                                        <div style={{ fontSize: '0.8rem', backgroundColor: `${tier.color}33`, color: tier.color, padding: '0.2rem 0.6rem', borderRadius: '10px', fontWeight: 'bold' }}>
+                                            Atual
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+
+                        <button className="close-modal-btn" onClick={() => setShowLeagues(false)}>
+                            Entendi
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
         try {
             const response = await api.login({ email, password });
             const { token, name, email: userEmail } = response;
-            
+
             const userData = { token, name, email: userEmail };
             localStorage.setItem('user', JSON.stringify(userData));
             localStorage.setItem('token', token); // Keep token separate if needed for API interceptors, or just use user.token
@@ -37,8 +37,14 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     };
 
+    const updateUser = (newData) => {
+        const updatedUser = { ...user, ...newData };
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+    };
+
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, logout, updateUser, loading }}>
             {!loading && children}
         </AuthContext.Provider>
     );
