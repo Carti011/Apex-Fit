@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Activity, Target, User, Utensils, LogOut } from 'lucide-react';
+import { Activity, Target, User, Utensils, LogOut, ShieldCheck } from 'lucide-react';
 import EvolutionPanel from '../components/dashboard/EvolutionPanel';
 import DailyQuests from '../components/dashboard/DailyQuests';
 import BioProfileForm from '../components/dashboard/BioProfileForm';
 import NutritionPlan from '../components/dashboard/NutritionPlan';
+import AccountSettings from '../components/dashboard/AccountSettings';
 import { api } from '../services/api';
 import './Dashboard.css';
 
@@ -88,6 +89,11 @@ const Dashboard = () => {
                 return <BioProfileForm user={dashboardData} onUpdate={handleProfileUpdate} />;
             case 'diet':
                 return <NutritionPlan nutrition={dashboardData?.nutritionPlan} />;
+            case 'account':
+                return <AccountSettings user={{ ...user, ...dashboardData }} onUpdateSuccess={(newData) => {
+                    if (newData) setDashboardData(newData);
+                    setActiveTab('dashboard');
+                }} />;
             default:
                 return <EvolutionPanel user={{ ...user, ...dashboardData }} onNavigate={setActiveTab} />;
         }
@@ -133,6 +139,14 @@ const Dashboard = () => {
                         <Utensils size={20} />
                         <span>Dieta</span>
                     </button>
+
+                    <button
+                        className={`sidebar-link ${activeTab === 'account' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('account')}
+                    >
+                        <ShieldCheck size={20} />
+                        <span>Conta</span>
+                    </button>
                 </nav>
 
                 <div className="sidebar-footer">
@@ -147,7 +161,12 @@ const Dashboard = () => {
             <main className="dashboard-main">
                 {/* Header Mobile/Desktop */}
                 <header className="dashboard-header">
-                    <div className="user-welcome">
+                    <div
+                        className="user-welcome interactive-card"
+                        onClick={() => setActiveTab('account')}
+                        style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.5rem', borderRadius: '12px' }}
+                        title="Editar Configurações de Conta"
+                    >
                         <div className="avatar-placeholder">
                             {user?.name?.charAt(0) || 'U'}
                         </div>

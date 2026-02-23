@@ -328,6 +328,88 @@
     }
 }
 
+/* Leagues Modal */
+.leagues-modal {
+    background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(30, 30, 30, 0.95) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 90%;
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(10px);
+}
+
+.league-tier {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: transform 0.2s, background 0.2s;
+    margin-bottom: 0.8rem;
+}
+
+.league-tier:last-child {
+    margin-bottom: 0;
+}
+
+.league-tier:hover {
+    transform: translateX(5px);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.league-tier-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.league-tier-info {
+    flex: 1;
+}
+
+.league-tier-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+}
+
+.league-tier-xp {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.league-tier.current {
+    background: rgba(255, 255, 255, 0.1);
+    border-width: 2px;
+}
+
+.close-modal-btn {
+    margin-top: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    padding: 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.close-modal-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
 /* Responsive Dashboard */
 @media (max-width: 768px) {
     .dashboard-sidebar {
