@@ -481,4 +481,8 @@
     .mobile-logout-btn:active {
         background: rgba(255, 77, 77, 0.2);
     }
+
+    .leagues-modal {
+        margin-top: -20px;
+    }
 }

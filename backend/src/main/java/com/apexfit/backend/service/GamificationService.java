@@ -30,24 +30,22 @@ public class GamificationService {
         int newXp = user.getCurrentXp() + amount;
         user.setCurrentXp(newXp);
 
-        // Fixed XP Tiers:
-        // 1 (Bronze): 0 -> 2999
-        // 2 (Prata): 3000 -> 9999
-        // 3 (Ouro): 10000 -> 49999
-        // 4 (Diamante): >= 50000
-        if (newXp >= 50000) {
-            user.setLevel(4);
-            user.setTargetXp(newXp); // No further target
-        } else if (newXp >= 10000) {
-            user.setLevel(3);
-            user.setTargetXp(50000);
-        } else if (newXp >= 3000) {
-            user.setLevel(2);
-            user.setTargetXp(10000);
-        } else {
-            user.setLevel(1);
-            user.setTargetXp(3000);
+        // Infinite Geometric Level Curve
+        // Level N requires N * 100 XP to advance.
+        // Lvl 1: 0 - 99 XP (Target: 100)
+        // Lvl 2: 100 - 299 XP (Target: 300)
+        // Lvl 3: 300 - 599 XP (Target: 600)
+        int level = 1;
+        int targetXp = 100;
+
+        while (newXp >= targetXp) {
+            level++;
+            int xpForNextLevel = level * 100;
+            targetXp += xpForNextLevel;
         }
+
+        user.setLevel(level);
+        user.setTargetXp(targetXp);
 
         user = userRepository.save(user);
 
@@ -58,6 +56,25 @@ public class GamificationService {
         history.setXpGained(history.getXpGained() + amount);
         xpHistoryRepository.save(history);
 
+        return user;
+    }
+
+    /**
+     * Recalculates the user's infinite geometric level based on currentXp.
+     */
+    public User recalculateUserLevel(User user) {
+        int xp = user.getCurrentXp();
+        int level = 1;
+        int targetXp = 100;
+
+        while (xp >= targetXp) {
+            level++;
+            int xpForNextLevel = level * 100;
+            targetXp += xpForNextLevel;
+        }
+
+        user.setLevel(level);
+        user.setTargetXp(targetXp);
         return user;
     }
 

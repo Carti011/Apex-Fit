@@ -1,0 +1,504 @@
+/* Home.css - Estilos premium da Landing Page */
+
+.home-container {
+    overflow-x: hidden;
+    position: relative;
+    background: var(--bg-color);
+}
+
+/* Background Glowing Orbs */
+.glow-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    z-index: 0;
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.orb-1 {
+    width: 50vw;
+    height: 50vw;
+    background: rgba(0, 255, 136, 0.12);
+    top: -10vw;
+    left: -10vw;
+}
+
+.orb-2 {
+    width: 40vw;
+    height: 40vw;
+    background: rgba(147, 51, 234, 0.12);
+    top: 30vh;
+    right: -20vw;
+}
+
+/* Nova Hero Section */
+.hero-redesign {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 10rem 2rem 4rem;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.beta-badge {
+    background: rgba(0, 255, 136, 0.1);
+    color: var(--accent-color);
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    backdrop-filter: blur(10px);
+}
+
+.hero-title-main {
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    font-weight: 900;
+    line-height: 1.05;
+    margin-bottom: 1.5rem;
+    letter-spacing: -2px;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #fff 20%, #00ff88 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin-bottom: 3rem;
+    line-height: 1.6;
+}
+
+/* App Mockup Interativo */
+.hero-mockup-wrapper {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 800px;
+    margin: 2rem auto 6rem;
+    perspective: 1200px;
+}
+
+.app-mockup {
+    background: rgba(20, 20, 20, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+    transform: rotateX(8deg) scale(0.95);
+    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    backdrop-filter: blur(20px);
+    text-align: left;
+}
+
+.hero-mockup-wrapper:hover .app-mockup {
+    transform: rotateX(0deg) scale(1);
+    box-shadow: 0 40px 80px -20px rgba(0, 255, 136, 0.2);
+}
+
+.mockup-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 1.25rem 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.mockup-user {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.mockup-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-color), #3b82f6);
+}
+
+.mockup-level {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.mockup-name {
+    font-weight: 800;
+    font-size: 1.1rem;
+}
+
+.mockup-stats {
+    display: flex;
+    gap: 1rem;
+}
+
+.mockup-stat-pill {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 6px 14px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.mockup-stat-pill.fire {
+    color: #f97316;
+}
+
+.mockup-stat-pill.xp {
+    color: var(--accent-color);
+}
+
+.mockup-body {
+    padding: 2.5rem;
+    display: grid;
+    gap: 1.5rem;
+}
+
+.mockup-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 1.5rem;
+}
+
+.mockup-progress-bar {
+    height: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    margin-top: 1.5rem;
+    overflow: hidden;
+}
+
+.mockup-progress-fill {
+    height: 100%;
+    background: var(--accent-color);
+    width: 65%;
+    box-shadow: 0 0 15px var(--accent-color);
+}
+
+/* Social Proof Bar */
+.social-proof {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    padding: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 1;
+}
+
+.proof-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.proof-number {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #fff;
+}
+
+.proof-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Steps (Como Funciona) */
+.steps-section {
+    padding: 8rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 3rem;
+    margin-top: 4rem;
+}
+
+.step-card {
+    position: relative;
+    padding: 2.5rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    transition: transform 0.3s;
+}
+
+.step-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(0, 255, 136, 0.2);
+}
+
+.step-number {
+    position: absolute;
+    top: -25px;
+    left: 20px;
+    font-size: 5rem;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.04);
+    line-height: 1;
+    z-index: 0;
+}
+
+.step-icon {
+    width: 56px;
+    height: 56px;
+    background: rgba(0, 255, 136, 0.1);
+    color: var(--accent-color);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.step-card h3 {
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+.step-card p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    position: relative;
+    z-index: 1;
+}
+
+/* Bento Box Grid */
+.bento-section {
+    padding: 4rem 2rem 8rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+.bento-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 280px);
+    gap: 1.5rem;
+    margin-top: 3rem;
+}
+
+.bento-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 24px;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    transition: all 0.4s ease;
+}
+
+.bento-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(0, 255, 136, 0.3);
+    box-shadow: 0 10px 30px -10px rgba(0, 255, 136, 0.1);
+}
+
+.bento-large {
+    grid-column: span 2;
+    grid-row: span 2;
+    background: linear-gradient(145deg, rgba(25, 25, 25, 0.8), rgba(10, 10, 10, 0.9));
+}
+
+.bento-medium {
+    grid-column: span 1;
+    grid-row: span 1;
+}
+
+.bento-bg-icon {
+    position: absolute;
+    bottom: -30px;
+    right: -30px;
+    opacity: 0.04;
+    transform: rotate(-15deg);
+    color: var(--text-primary);
+}
+
+.bento-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    z-index: 1;
+}
+
+.bento-large .bento-title {
+    font-size: 2.5rem;
+    max-width: 80%;
+}
+
+.bento-desc {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    z-index: 1;
+    font-size: 1.1rem;
+}
+
+/* Call To Action Box */
+.cta-section {
+    padding: 6rem 2rem;
+    text-align: center;
+    background: linear-gradient(to top, rgba(0, 255, 136, 0.05), transparent);
+}
+
+.cta-box {
+    max-width: 800px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 5rem 3rem;
+    border-radius: 32px;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+}
+
+.cta-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+}
+
+.cta-box h2 {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+}
+
+.cta-box p {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    margin-bottom: 3rem;
+}
+
+/* Media Queries */
+@media (max-width: 900px) {
+    .bento-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+    }
+
+    .bento-large,
+    .bento-medium {
+        grid-column: span 1;
+        grid-row: span 1;
+        min-height: 300px;
+    }
+
+    .social-proof {
+        flex-direction: column;
+        gap: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-redesign {
+        padding: 7rem 1.2rem 2rem;
+    }
+
+    .hero-title-main {
+        font-size: clamp(2.5rem, 10vw, 3.5rem);
+    }
+
+    .hero-subtitle {
+        font-size: 1.1rem;
+    }
+
+    /* Remove a inclinação 3D no Mobile para aproveitar a largura */
+    .app-mockup {
+        transform: rotateX(0deg) scale(1) !important;
+        border-radius: 16px;
+    }
+
+    .hero-mockup-wrapper {
+        margin: 2rem auto;
+        perspective: none;
+    }
+
+    /* Empilha os elementos do Header do Mockup */
+    .mockup-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.25rem;
+        gap: 1rem;
+    }
+
+    .mockup-stats {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+    }
+
+    .mockup-stat-pill {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+    }
+
+    .mockup-body {
+        padding: 1.25rem;
+    }
+
+    .mockup-card {
+        padding: 1.2rem;
+    }
+
+    /* Reduz espaçamentos nas enguias de texto para não gerar rolagem infinita vazia */
+    .steps-section,
+    .bento-section,
+    .cta-section {
+        padding: 4rem 1.2rem;
+    }
+
+    .cta-box {
+        padding: 3rem 1.5rem;
+        border-radius: 20px;
+    }
+
+    .cta-box h2 {
+        font-size: 2rem;
+    }
+
+    .cta-button {
+        width: 100%;
+        padding: 1rem !important;
+        font-size: 1rem !important;
+    }
+}
