@@ -27,11 +27,20 @@ const Dashboard = () => {
     const [showLevelUp, setShowLevelUp] = useState(false);
     const [showTitlesModal, setShowTitlesModal] = useState(false);
     const [prevLevel, setPrevLevel] = useState(null);
+    const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
+    const showToast = (message, type = 'success') => {
+        setToast({ show: true, message, type });
+        setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
+    };
+
+    // Merge Auth user with fresh DashboardData
+    const activeData = { ...user, ...dashboardData };
 
     // Level Progress Math
-    const level = user?.level || 1;
-    const currentXp = user?.currentXp || 0;
-    const targetXp = user?.targetXp || 100;
+    const level = activeData.level || 1;
+    const currentXp = activeData.currentXp || 0;
+    const targetXp = activeData.targetXp || 100;
     const gap = level * 100;
     const base = targetXp - gap;
     const progressInLevel = Math.max(0, currentXp - base);
@@ -71,10 +80,10 @@ const Dashboard = () => {
 
             setPrevLevel(updatedData.level);
             setDashboardData(updatedData);
-            alert("Perfil salvo com sucesso!");
+            showToast("Perfil biológico salvo com sucesso!");
             setActiveTab('diet'); // Redireciona para a aba de dieta para ver os resultados
         } catch (error) {
-            alert("Erro ao salvar perfil");
+            showToast("Erro ao salvar perfil. Verifique os dados.", "error");
             console.error(error);
         }
     };
@@ -90,8 +99,9 @@ const Dashboard = () => {
 
             setPrevLevel(updatedData.level);
             setDashboardData(updatedData);
+            showToast("Missão concluída! XP Adicionado.");
         } catch (error) {
-            alert("Erro ao concluir missão");
+            showToast("Erro ao concluir missão.", "error");
             console.error(error);
         }
     };
@@ -227,7 +237,7 @@ const Dashboard = () => {
                     <div className="level-up-modal slide-up-bounce">
                         <div className="level-up-icon">⭐</div>
                         <h3 className="level-up-title">LEVEL UP! 🚀</h3>
-                        <p className="level-up-text">Você alcançou o Nível <span className="highlight-level">{user?.level}</span></p>
+                        <p className="level-up-text">Você alcançou o Nível <span className="highlight-level">{level}</span></p>
                         <button
                             className="level-up-btn"
                             onClick={() => setShowLevelUp(false)}
@@ -260,7 +270,7 @@ const Dashboard = () => {
                                 { min: 50, max: 99, title: '👑 Elite' },
                                 { min: 100, max: '∞', title: '🏆 Lenda do Apex Fit' }
                             ].map((tier) => {
-                                const isCurrent = (user?.level || 1) >= tier.min && (tier.max === '∞' || (user?.level || 1) <= tier.max);
+                                const isCurrent = level >= tier.min && (tier.max === '∞' || level <= tier.max);
                                 return (
                                     <div key={tier.title} className={`league-tier ${isCurrent ? 'current' : ''}`} style={isCurrent ? { borderColor: 'var(--accent-color)' } : { padding: '0.8rem 1rem' }}>
                                         <div className="league-tier-info" style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
@@ -277,6 +287,14 @@ const Dashboard = () => {
                     </div>
                 </div>
             )}
+
+            {/* Premium Toast Notification */}
+            <div className={`premium-toast ${toast.show ? 'show' : ''} ${toast.type}`}>
+                <div className="toast-icon">
+                    {toast.type === 'success' ? '✅' : '⚠️'}
+                </div>
+                <div className="toast-text">{toast.message}</div>
+            </div>
         </div>
     );
 };

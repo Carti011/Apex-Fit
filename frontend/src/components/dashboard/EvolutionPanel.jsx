@@ -6,22 +6,21 @@ import '../../App.css';
 const EvolutionPanel = ({ user, onNavigate }) => {
     const [showLeagues, setShowLeagues] = useState(false);
 
-    const getLeagueInfo = (level) => {
-        switch (level) {
-            case 1: return { name: 'Bronze', color: '#cd7f32', min: 0, max: 3000 };
-            case 2: return { name: 'Prata', color: '#c0c0c0', min: 3000, max: 10000 };
-            case 3: return { name: 'Ouro', color: '#ffd700', min: 10000, max: 50000 };
-            case 4: return { name: 'Diamante', color: '#b9f2ff', min: 50000, max: 50000 };
-            default: return { name: 'Bronze', color: '#cd7f32', min: 0, max: 3000 };
-        }
+    const getLeagueInfo = (xp) => {
+        if (xp >= 50000) return { name: 'Diamante', color: '#b9f2ff', min: 50000, max: 50000 };
+        if (xp >= 10000) return { name: 'Ouro', color: '#ffd700', min: 10000, max: 50000 };
+        if (xp >= 3000) return { name: 'Prata', color: '#c0c0c0', min: 3000, max: 10000 };
+        return { name: 'Bronze', color: '#cd7f32', min: 0, max: 3000 };
     };
 
-    const league = getLeagueInfo(user?.level || 1);
     const current = user?.currentXp || 0;
+    const league = getLeagueInfo(current);
 
     let progressPercent = 100;
-    if (user?.level < 4) {
-        progressPercent = ((current - league.min) / (league.max - league.min)) * 100;
+    if (league.name !== 'Diamante') {
+        const progressInLeague = current - league.min;
+        const totalLeagueXp = league.max - league.min;
+        progressPercent = (progressInLeague / totalLeagueXp) * 100;
         progressPercent = Math.max(0, Math.min(100, progressPercent));
     }
 
@@ -59,7 +58,7 @@ const EvolutionPanel = ({ user, onNavigate }) => {
                         ></div>
                     </div>
                     <div className="xp-text" style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#aaa' }}>
-                        {user?.level < 4 ? `Faltam ${league.max - current} XP para a próxima liga` : 'Você atingiu a liga máxima!'}
+                        {league.name !== 'Diamante' ? `Faltam ${league.max - current} XP para a próxima liga` : 'Você atingiu a liga máxima!'}
                     </div>
                 </div>
 
@@ -123,12 +122,12 @@ const EvolutionPanel = ({ user, onNavigate }) => {
 
                         <div className="league-tiers-list">
                             {[
-                                { level: 1, name: 'Bronze', color: '#cd7f32', desc: '0 - 3.000 XP' },
-                                { level: 2, name: 'Prata', color: '#c0c0c0', desc: '3.000 - 10.000 XP' },
-                                { level: 3, name: 'Ouro', color: '#ffd700', desc: '10.000 - 50.000 XP' },
-                                { level: 4, name: 'Diamante', color: '#b9f2ff', desc: '50.000+ XP Máximo' }
+                                { name: 'Bronze', color: '#cd7f32', desc: '0 - 3.000 XP' },
+                                { name: 'Prata', color: '#c0c0c0', desc: '3.000 - 10.000 XP' },
+                                { name: 'Ouro', color: '#ffd700', desc: '10.000 - 50.000 XP' },
+                                { name: 'Diamante', color: '#b9f2ff', desc: '50.000+ XP Máximo' }
                             ].map((tier) => (
-                                <div key={tier.name} className={`league-tier ${user?.level === tier.level ? 'current' : ''}`} style={user?.level === tier.level ? { borderColor: tier.color } : {}}>
+                                <div key={tier.name} className={`league-tier ${league.name === tier.name ? 'current' : ''}`} style={league.name === tier.name ? { borderColor: tier.color } : {}}>
                                     <div className="league-tier-icon">
                                         <Trophy size={24} style={{ color: tier.color }} />
                                     </div>
@@ -136,7 +135,7 @@ const EvolutionPanel = ({ user, onNavigate }) => {
                                         <div className="league-tier-name" style={{ color: tier.color }}>{tier.name}</div>
                                         <div className="league-tier-xp">{tier.desc}</div>
                                     </div>
-                                    {user?.level === tier.level && (
+                                    {league.name === tier.name && (
                                         <div style={{ fontSize: '0.8rem', backgroundColor: `${tier.color}33`, color: tier.color, padding: '0.2rem 0.6rem', borderRadius: '10px', fontWeight: 'bold' }}>
                                             Atual
                                         </div>
