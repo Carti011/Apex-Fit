@@ -47,6 +47,7 @@ class GamificationControllerTest {
                 15.0, ActivityLevel.ACTIVE, Goal.GAIN_MUSCLE);
 
         mockDashboard = new DashboardDataDTO(
+                "Test User", "test@email.com",
                 2, 50, 200, 5, true, false, false,
                 bio,
                 null);
