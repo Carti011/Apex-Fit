@@ -240,6 +240,8 @@
     left: 0;
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
+    /* iOS: desconta barra de endereçoso e UI do browser */
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(8px);
     display: flex;
@@ -552,6 +554,8 @@
     /* Mobile Modals (Bottom Sheet Pattern) */
     .level-up-overlay {
         align-items: flex-end;
+        padding-bottom: 4vh;
+        /* Levanta o modal do fundo em todos os iPhones */
     }
 
     .level-up-modal,
@@ -559,7 +563,7 @@
         width: 100%;
         max-width: 100%;
         border-radius: 32px 32px 0 0;
-        padding: 3rem 1.5rem 4rem 1.5rem;
+        padding: 3rem 1.5rem calc(2rem + env(safe-area-inset-bottom)) 1.5rem;
         margin-top: 0;
         border-left: none;
         border-right: none;
@@ -581,7 +585,13 @@
         bottom: 110px;
     }
 
-    .leagues-modal {
-        margin-top: -20px;
+}
+
+/* Telas altas (iPhone Pro Max e similares) - empurra modal mais para cima */
+@media (max-width: 768px) and (min-height: 900px) {
+    .level-up-overlay {
+        padding-bottom: 7vh;
     }
 }
+
+/* Fim do @media (max-width: 768px) */
