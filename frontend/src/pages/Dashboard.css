@@ -479,55 +479,129 @@
     font-weight: 500;
 }
 
-/* Responsive Dashboard */
-@media (max-width: 768px) {
-    .dashboard-sidebar {
-        bottom: 0;
-        top: auto;
-        /* Important to override desktop top: 0 */
-        width: 100%;
-        height: auto;
-        /* Important to override desktop height: 100vh */
-        flex-direction: row;
-        padding: 0.8rem 1rem max(1.5rem, env(safe-area-inset-bottom));
-        background: rgba(13, 13, 13, 0.95);
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        border-right: none;
-        justify-content: space-around;
-        backdrop-filter: blur(10px);
-    }
+/* ============================= */
+/* Bottom Nav (Mobile Dedicated)  */
+/* ============================= */
+.bottom-nav {
+    display: none;
+    /* oculto no desktop por padrao */
+}
 
-    .sidebar-header,
-    .sidebar-footer {
+.bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.65rem;
+    font-family: inherit;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: all 0.2s;
+    min-width: 60px;
+}
+
+.bottom-nav-item:hover,
+.bottom-nav-item.active {
+    color: var(--accent-color);
+}
+
+.bottom-nav-item.active svg {
+    filter: drop-shadow(0 0 6px rgba(0, 255, 136, 0.6));
+}
+
+.bottom-nav-avatar {
+    width: 24px;
+    height: 24px;
+    background: rgba(0, 255, 136, 0.2);
+    color: var(--accent-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.75rem;
+    transition: all 0.2s;
+}
+
+.bottom-nav-item.active .bottom-nav-avatar {
+    background: rgba(0, 255, 136, 0.3);
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+}
+
+/* Links que so aparecem no desktop */
+.desktop-only {
+    display: flex;
+}
+
+/* ========================= */
+/* Chat Fullscreen Mode       */
+/* ========================= */
+.dashboard-layout.chat-fullscreen .dashboard-header {
+    display: none;
+}
+
+.dashboard-layout.chat-fullscreen .bottom-nav {
+    display: none !important;
+}
+
+.dashboard-layout.chat-fullscreen .dashboard-sidebar {
+    display: none;
+}
+
+.dashboard-layout.chat-fullscreen .dashboard-main {
+    margin-left: 0;
+    padding: 0;
+    width: 100%;
+    height: 100vh;
+}
+
+.dashboard-layout.chat-fullscreen .dashboard-content {
+    height: 100vh;
+}
+
+/* ========================= */
+/* Responsive Dashboard      */
+/* ========================= */
+@media (max-width: 768px) {
+
+    /* Esconde sidebar completamente no mobile */
+    .dashboard-sidebar {
         display: none;
     }
 
-    .sidebar-nav {
+    /* Link de Perfil e Conta ficam apenas no desktop */
+    .desktop-only {
+        display: none !important;
+    }
+
+    /* Exibe o Bottom Nav dedicado */
+    .bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        height: auto;
         flex-direction: row;
-        width: 100%;
-        justify-content: space-between;
+        padding: 0.6rem 0.5rem max(1rem, env(safe-area-inset-bottom));
+        background: rgba(13, 13, 13, 0.96);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(16px);
+        justify-content: space-around;
         align-items: center;
-    }
-
-    .sidebar-link {
-        flex-direction: column;
-        padding: 0.5rem;
-        gap: 0.25rem;
-        font-size: 0.7rem;
-        justify-content: center;
-        border-radius: 8px;
-    }
-
-    .sidebar-link svg {
-        width: 24px;
-        height: 24px;
     }
 
     .dashboard-main {
         margin-left: 0;
         width: 100%;
-        padding: 1rem 1rem 100px 1rem;
-        /* Extra padding bottom for nav bar */
+        padding: 1rem 1rem 90px 1rem;
     }
 
     .stat-value {
@@ -555,42 +629,598 @@
     .level-up-overlay {
         align-items: flex-end;
         padding-bottom: 4vh;
-        /* Levanta o modal do fundo em todos os iPhones */
-
-        .level-up-modal,
-        .leagues-modal {
-            width: 100%;
-            max-width: 100%;
-            border-radius: 32px 32px 0 0;
-            padding: 3rem 1.5rem calc(2rem + env(safe-area-inset-bottom)) 1.5rem;
-            margin-top: 0;
-            border-left: none;
-            border-right: none;
-            border-bottom: none;
-        }
-
-        .level-up-modal {
-            border-top: 1px solid rgba(0, 255, 136, 0.3);
-            box-shadow: 0 -10px 50px rgba(0, 255, 136, 0.15);
-        }
-
-        .leagues-modal {
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 -10px 50px rgba(0, 0, 0, 0.5);
-        }
-
-        /* Prevent Toast from overlapping mobile navigation */
-        .premium-toast {
-            bottom: 110px;
-        }
-
     }
 
+    .level-up-modal,
+    .leagues-modal {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 32px 32px 0 0;
+        padding: 3rem 1.5rem calc(2rem + env(safe-area-inset-bottom)) 1.5rem;
+        margin-top: 0;
+        border-left: none;
+        border-right: none;
+        border-bottom: none;
+    }
+
+    .level-up-modal {
+        border-top: 1px solid rgba(0, 255, 136, 0.3);
+        box-shadow: 0 -10px 50px rgba(0, 255, 136, 0.15);
+    }
+
+    .leagues-modal {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 -10px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .premium-toast {
+        bottom: 110px;
+    }
+
+    /* Chat fullscreen: padding 0 */
+    .dashboard-layout.chat-fullscreen .dashboard-main {
+        padding: 0;
+    }
 }
 
 /* Telas altas (iPhone Pro Max e similares) - empurra modal mais para cima */
 @media (max-width: 768px) and (min-height: 900px) {
     .level-up-overlay {
         padding-bottom: 7vh;
+    }
+}
+
+/* ======================== */
+/* APEX CTA Button           */
+/* ======================== */
+.apex-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1.5rem;
+    margin-top: 1rem;
+    background: rgba(0, 255, 136, 0.08);
+    color: var(--accent-color);
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border: 1px solid rgba(0, 255, 136, 0.25);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    letter-spacing: 0.02em;
+}
+
+.apex-cta-btn:hover {
+    background: rgba(0, 255, 136, 0.18);
+    border-color: rgba(0, 255, 136, 0.5);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.2), inset 0 0 12px rgba(0, 255, 136, 0.05);
+    transform: translateY(-2px);
+    color: #fff;
+}
+
+.apex-cta-btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* Variante grande — CTA principal (sem dieta salva) */
+.apex-cta-btn.large {
+    padding: 1rem 2rem;
+    font-size: 1.05rem;
+    border-radius: 16px;
+    margin-top: 0;
+}
+
+.apex-cta-btn.large:hover {
+    box-shadow: 0 0 32px rgba(0, 255, 136, 0.3), inset 0 0 16px rgba(0, 255, 136, 0.05);
+}
+
+.apex-cta-btn-emoji {
+    font-size: 1.15em;
+    line-height: 1;
+    transition: transform 0.25s ease;
+}
+
+.apex-cta-btn:hover .apex-cta-btn-emoji {
+    transform: rotate(-8deg) scale(1.15);
+}
+
+/* ========================== */
+/* Formulário Preferências     */
+/* de Dieta no NutritionPlan  */
+/* ========================== */
+.diet-pref-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    background: transparent;
+    border: none;
+    color: white;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-radius: 16px;
+}
+
+.diet-pref-toggle:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.pref-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    background: rgba(251, 191, 36, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    letter-spacing: 0.03em;
+}
+
+.pref-badge.ok {
+    background: rgba(0, 255, 136, 0.1);
+    color: #00ff88;
+    border-color: rgba(0, 255, 136, 0.25);
+}
+
+.diet-pref-form {
+    padding: 0 1.5rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.diet-pref-desc {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin: 1rem 0 0;
+}
+
+.diet-pref-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.chat-divider {
+    border: none;
+    border-top: 1px dashed rgba(255, 255, 255, 0.2);
+    margin: 1.5rem 0;
+}
+
+.diet-pref-group label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.pref-opt {
+    font-size: 0.75rem;
+    opacity: 0.6;
+    font-weight: 400;
+}
+
+.diet-pref-pills {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.diet-pill {
+    padding: 0.5rem 1.1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.diet-pill.selected {
+    border-color: var(--accent-color);
+    background: rgba(0, 255, 136, 0.12);
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+.diet-pill:hover:not(.selected) {
+    border-color: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.07);
+    color: white;
+}
+
+.diet-pref-textarea {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: white;
+    font-family: inherit;
+    font-size: 0.9rem;
+    padding: 0.75rem 1rem;
+    resize: none;
+    transition: border-color 0.2s;
+    line-height: 1.5;
+}
+
+.diet-pref-textarea:focus {
+    outline: none;
+    border-color: rgba(0, 255, 136, 0.4);
+}
+
+.diet-pref-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* ======================== */
+/* Agente Nutricionista Chat */
+/* ======================== */
+.nutritionist-chat-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 160px);
+    max-height: 760px;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 255, 136, 0.15);
+    box-shadow: 0 0 40px rgba(0, 255, 136, 0.05);
+}
+
+/* Modo fullscreen — ocupa tela inteira sem bordas */
+.chat-fullscreen .nutritionist-chat-container {
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+    border: none;
+}
+
+.chat-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid rgba(0, 255, 136, 0.15);
+    background: rgba(10, 15, 26, 0.9);
+    flex-shrink: 0;
+}
+
+.chat-back-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.chat-back-btn:hover {
+    background: rgba(0, 255, 136, 0.1);
+    color: #00ff88;
+    border-color: rgba(0, 255, 136, 0.3);
+}
+
+.chat-avatar-ia {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 200, 100, 0.3));
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #00ff88;
+    flex-shrink: 0;
+}
+
+.chat-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+}
+
+.chat-status {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: rgba(8, 12, 20, 0.7);
+    scroll-behavior: smooth;
+}
+
+.chat-messages::-webkit-scrollbar {
+    width: 4px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 136, 0.2);
+    border-radius: 4px;
+}
+
+.chat-bubble-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    max-width: 85%;
+}
+
+.chat-bubble-wrapper.user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.chat-bubble-wrapper.ia {
+    align-self: flex-start;
+}
+
+.chat-bubble-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.8rem;
+}
+
+.chat-bubble-wrapper.ia .chat-bubble-icon {
+    background: rgba(0, 255, 136, 0.15);
+    color: #00ff88;
+}
+
+.chat-bubble-wrapper.user .chat-bubble-icon {
+    background: rgba(100, 100, 255, 0.15);
+    color: #8888ff;
+}
+
+.chat-bubble {
+    padding: 0.9rem 1.2rem;
+    border-radius: 16px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    max-width: 100%;
+}
+
+.bubble-ia {
+    background: rgba(0, 255, 136, 0.06);
+    border: 1px solid rgba(0, 255, 136, 0.12);
+    color: #e0e0e0;
+    border-top-left-radius: 4px;
+}
+
+.bubble-user {
+    background: rgba(100, 100, 255, 0.12);
+    border: 1px solid rgba(100, 100, 255, 0.2);
+    color: white;
+    border-top-right-radius: 4px;
+}
+
+/* Indicador de digitando */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 1rem 1.2rem;
+}
+
+.typing-indicator span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #00ff88;
+    opacity: 0.6;
+    animation: typingBounce 1.2s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typingBounce {
+
+    0%,
+    60%,
+    100% {
+        transform: translateY(0);
+        opacity: 0.4;
+    }
+
+    30% {
+        transform: translateY(-6px);
+        opacity: 1;
+    }
+}
+
+/* Botoes de acao (Salvar Dieta / Baixar PDF) */
+.chat-actions {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    background: rgba(8, 12, 20, 0.8);
+    border-top: 1px solid rgba(0, 255, 136, 0.08);
+    flex-shrink: 0;
+}
+
+.chat-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.2rem;
+    border-radius: 30px;
+    border: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+}
+
+.save-btn {
+    background: rgba(0, 255, 136, 0.15);
+    color: #00ff88;
+    border: 1px solid rgba(0, 255, 136, 0.3);
+}
+
+.save-btn:hover:not(:disabled) {
+    background: rgba(0, 255, 136, 0.25);
+    transform: translateY(-1px);
+}
+
+.save-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pdf-btn {
+    background: rgba(100, 100, 255, 0.15);
+    color: #8888ff;
+    border: 1px solid rgba(100, 100, 255, 0.3);
+}
+
+.pdf-btn:hover {
+    background: rgba(100, 100, 255, 0.25);
+    transform: translateY(-1px);
+}
+
+.remind-btn {
+    background: rgba(251, 191, 36, 0.1);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.25);
+}
+
+.remind-btn:hover {
+    background: rgba(251, 191, 36, 0.2);
+    transform: translateY(-1px);
+}
+
+.remind-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Area de input */
+.chat-input-area {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    gap: 0.75rem;
+    border-top: 1px solid rgba(0, 255, 136, 0.1);
+    background: rgba(10, 15, 26, 0.95);
+    flex-shrink: 0;
+}
+
+.chat-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 0.8rem 1.2rem;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.chat-input:focus {
+    border-color: rgba(0, 255, 136, 0.4);
+}
+
+.chat-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.chat-send-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00ff88, #00cc6a);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    cursor: pointer;
+    transition: all 0.25s;
+    flex-shrink: 0;
+}
+
+.chat-send-btn:hover:not(:disabled) {
+    transform: scale(1.1);
+    box-shadow: 0 0 16px rgba(0, 255, 136, 0.4);
+}
+
+.chat-send-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Icone giratório de carregamento */
+.spin {
+    animation: spinIcon 1s linear infinite;
+}
+
+@keyframes spinIcon {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* CTA Consultar Nutricionista */
+.cta-nutricionista {
+    background: rgba(0, 255, 136, 0.03);
+    border: 1px solid rgba(0, 255, 136, 0.12);
+    border-radius: 20px;
+}
+
+/* Responsivo mobile do chat */
+@media (max-width: 768px) {
+    .nutritionist-chat-container {
+        height: calc(100vh - 200px);
+        max-height: none;
+        border-radius: 16px;
+    }
+
+    .chat-bubble-wrapper {
+        max-width: 95%;
+    }
+
+    .chat-messages {
+        padding: 1rem;
+    }
+
+    .chat-header,
+    .chat-input-area {
+        padding: 1rem;
     }
 }

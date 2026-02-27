@@ -119,5 +119,43 @@ export const api = {
         }
 
         return response.json();
+    },
+
+    // Envia uma mensagem para o Agente Nutricionista de IA
+    chatWithNutritionist: async (token, historico, novaMensagem) => {
+        const response = await fetch(`${API_URL}/ai/chat`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ historico, novaMensagem })
+        });
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.message || 'Erro ao se comunicar com a IA');
+        }
+
+        return response.json();
+    },
+
+    // Salva a dieta aprovada pelo usuario no banco
+    salvarDieta: async (token, dietaPlan) => {
+        const response = await fetch(`${API_URL}/ai/salvar-dieta`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ dietaPlan })
+        });
+
+        if (!response.ok) {
+            throw new Error('Falha ao salvar dieta');
+        }
+
+        return response.json();
     }
 };
+
