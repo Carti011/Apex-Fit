@@ -5,14 +5,14 @@ import { Send, Bot, User, Sparkles, Download, Save, ArrowLeft, ClipboardList } f
 import { parseDietText } from '../../utils/dietParser';
 import DietPdfTemplate from './DietPdfTemplate';
 
-// Renderiza texto inline com **negrito** em verde
+// Renderiza texto inline com **negrito** e glow suave
 const renderInline = (texto, key) => {
     if (!texto.includes('**')) return <span key={key}>{texto}</span>;
     const partes = texto.split('**');
     return (
         <span key={key}>
             {partes.map((p, j) => j % 2 === 1
-                ? <strong key={j} style={{ color: '#00ff88' }}>{p}</strong>
+                ? <strong key={j} style={{ color: '#00ff88', textShadow: '0 0 8px rgba(0, 255, 136, 0.4)', fontWeight: 700 }}>{p}</strong>
                 : <span key={j}>{p}</span>)}
         </span>
     );
@@ -24,7 +24,7 @@ const FormatarMensagem = ({ texto }) => {
     const textoLimpo = texto.replace(/<\/?DIETA_PDF>/g, '');
     const linhas = textoLimpo.split('\n');
     return (
-        <div className="mensagem-conteudo">
+        <div className="mensagem-conteudo" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', padding: '20px 22px' }}>
             {linhas.map((linha, i) => {
                 // --- separador: linha visual elegante
                 if (linha.trim() === '---' || linha.trim() === '___' || linha.trim() === '***') {
@@ -34,14 +34,15 @@ const FormatarMensagem = ({ texto }) => {
                 if (/^#{1,4}\s/.test(linha)) {
                     const nivel = (linha.match(/^#+/) || [''])[0].length;
                     const texto = linha.replace(/^#+\s/, '');
-                    const sizes = ['1.1rem', '1.05rem', '1rem', '0.97rem'];
+                    const sizes = ['1.15rem', '1.1rem', '1.05rem', '1rem'];
                     return (
                         <p key={i} style={{
-                            fontWeight: 700,
-                            fontSize: sizes[nivel - 1] || '0.97rem',
+                            fontWeight: 800,
+                            fontSize: sizes[nivel - 1] || '1rem',
                             color: '#00ff88',
-                            margin: nivel <= 2 ? '1rem 0 0.3rem' : '0.6rem 0 0.2rem',
-                            letterSpacing: '0.01em'
+                            margin: nivel <= 2 ? '1.2rem 0 0.4rem' : '0.8rem 0 0.3rem',
+                            letterSpacing: '0.02em',
+                            textTransform: nivel <= 2 ? 'uppercase' : 'none'
                         }}>
                             {renderInline(texto, i)}
                         </p>
@@ -50,16 +51,16 @@ const FormatarMensagem = ({ texto }) => {
                 // Itens de lista (• - *)
                 if (/^[•\-\*] /.test(linha)) {
                     return (
-                        <p key={i} style={{ margin: '0.1rem 0 0.1rem 0.8rem', lineHeight: '1.55', display: 'flex', gap: '0.4rem' }}>
-                            <span style={{ color: '#00ff88', flexShrink: 0 }}>•</span>
-                            {renderInline(linha.slice(2), i)}
-                        </p>
+                        <div key={i} style={{ margin: '0.2rem 0 0.2rem 0.6rem', lineHeight: '1.6', display: 'flex', gap: '0.6rem', alignItems: 'flex-start' }}>
+                            <span style={{ color: '#00ff88', flexShrink: 0, marginTop: '2px', fontSize: '1.1rem' }}>•</span>
+                            <div style={{ flex: 1 }}>{renderInline(linha.slice(2), i)}</div>
+                        </div>
                     );
                 }
                 // Linha vazia
-                if (!linha.trim()) return <br key={i} />;
+                if (!linha.trim()) return null; // evita <br> extras criando vãos enormes
                 // Paragrafo normal
-                return <p key={i} style={{ margin: '0.15rem 0', lineHeight: '1.6' }}>{renderInline(linha, i)}</p>;
+                return <p key={i} style={{ margin: '0', lineHeight: '1.65', color: 'rgba(255, 255, 255, 0.95)' }}>{renderInline(linha, i)}</p>;
             })}
         </div>
     );
@@ -162,7 +163,11 @@ const NutritionistChat = ({ dashboardData, onVoltar, onDietaSalva }) => {
     };
 
     const handleBaixarPdf = async () => {
-        const dietaTexto = dashboardData?.savedDietPlan || ultimaRespostaIA;
+        let dietaTexto = dashboardData?.savedDietPlan;
+        if (ultimaRespostaIA && ultimaRespostaIA.includes('<DIETA_PDF>')) {
+            dietaTexto = ultimaRespostaIA;
+        }
+
         if (!dietaTexto) return;
 
         // Importa html2pdf dinamicamente
@@ -256,7 +261,7 @@ const NutritionistChat = ({ dashboardData, onVoltar, onDietaSalva }) => {
         let htmlDailyTotals = '';
         if (sumKcal > 0) {
             htmlDailyTotals = `
-                <div style="margin-bottom: 16px; background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(0, 255, 136, 0.2); border-radius: 6px; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                <div style="margin-bottom: 24px; background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(0, 255, 136, 0.2); border-radius: 6px; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
                     <h3 style="color: #00ff88; margin: 0 0 8px 0; font-size: 0.85rem; text-align: center; border-bottom: 1px dashed rgba(0, 255, 136, 0.15); padding-bottom: 4px;">
                         📊 RESUMO DIÁRIO CALCULADO
                     </h3>
@@ -302,7 +307,7 @@ const NutritionistChat = ({ dashboardData, onVoltar, onDietaSalva }) => {
         let htmlHydration = '';
         if (parsedData.hydration) {
             htmlHydration = `
-                <div style="margin-top: auto; padding: 12px; background: rgba(56, 189, 248, 0.05); border: 1px dashed rgba(56, 189, 248, 0.3); border-radius: 6px; text-align: center;">
+                <div style="margin-top: 24px; padding: 12px; background: rgba(56, 189, 248, 0.05); border: 1px dashed rgba(56, 189, 248, 0.3); border-radius: 6px; text-align: center;">
                     <h4 style="color: #38bdf8; margin: 0 0 4px 0; font-size: 0.85rem;">💧 Meta de Hidratação</h4>
                     <p style="margin: 0; font-size: 0.85rem; color: #e2e8f0; font-weight: bold;">${formatBold(parsedData.hydration)}</p>
                 </div>
@@ -310,29 +315,41 @@ const NutritionistChat = ({ dashboardData, onVoltar, onDietaSalva }) => {
         }
 
         // Montagem do Corpo Completo em HTML Estrito (Compatível garantido com html2pdf e múltiplas páginas)
+        // Definimos min-height de ~297mm (tamanho de uma folha A4 menos bordas extremas do pdf engine) para garantir ocupação
         const htmlConteudo = `
-            <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #020617; color: #e2e8f0; padding: 24px; box-sizing: border-box; width: 100%; display: flex; flex-direction: column;">
-                <!--HEADER BRANDING-->
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid rgba(0, 255, 136, 0.3); padding-bottom: 12px; margin-bottom: 16px;">
-                    <div>
-                        <h1 style="color: #00ff88; font-size: 1.6rem; margin: 0; letter-spacing: 2px; font-weight: 800; text-transform: uppercase;">APEX<span style="color: white;">FIT</span></h1>
-                        <p style="color: #94a3b8; font-size: 0.7rem; margin: 2px 0 0; text-transform: uppercase; font-weight: 600;">Nutrição de Alta Performance</p>
+            <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #020617; color: #e2e8f0; padding: 32px 24px; box-sizing: border-box; width: 100%; min-height: 1100px; display: flex; flex-direction: column;">
+                
+                <!-- HEADER - SECTION TOP -->
+                <div>
+                    <!-- BRANDING -->
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid rgba(0, 255, 136, 0.3); padding-bottom: 12px; margin-bottom: 16px;">
+                        <div>
+                            <h1 style="color: #00ff88; font-size: 1.8rem; margin: 0; letter-spacing: 2px; font-weight: 800; text-transform: uppercase;">APEX<span style="color: white;">FIT</span></h1>
+                            <p style="color: #94a3b8; font-size: 0.75rem; margin: 2px 0 0; text-transform: uppercase; font-weight: 600;">Nutrição de Alta Performance</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="margin: 0 0 2px 0; font-size: 0.8rem; color: #e2e8f0;"><strong style="color: #00ff88;">Atleta:</strong> ${nome}</p>
+                            <p style="margin: 0; font-size: 0.75rem; color: #94a3b8;"><strong style="color: #00ff88;">Emissão:</strong> ${dataHoje}</p>
+                        </div>
                     </div>
-                    <div style="text-align: right;">
-                        <p style="margin: 0 0 2px 0; font-size: 0.75rem; color: #e2e8f0;"><strong style="color: #00ff88;">Atleta:</strong> ${nome}</p>
-                        <p style="margin: 0; font-size: 0.7rem; color: #94a3b8;"><strong style="color: #00ff88;">Emissão:</strong> ${dataHoje}</p>
+
+                    ${htmlHeaderLines}
+                    ${htmlDailyTotals}
+                </div>
+
+                <!-- MIDDLE - MEALS GRID (Flex-grow para ocupar o espaço livre no meio) -->
+                <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: space-around;">
+                    ${htmlMealsGrid}
+                </div>
+
+                <!-- FOOTER - SECTION BOTTOM -->
+                <div style="margin-top: auto;">
+                    ${htmlHydration}
+                    <div style="margin-top: 24px; text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 16px;">
+                        <p style="color: #64748b; font-size: 0.7rem; margin: 0; letter-spacing: 1px;">GERADO POR APEX FIT IA — NUTRIÇÃO DIGITAL AVANÇADA</p>
                     </div>
                 </div>
 
-                ${htmlHeaderLines}
-                ${htmlDailyTotals}
-                ${htmlMealsGrid}
-                ${htmlHydration}
-
-                <!--FOOTER -->
-                <div style="margin-top: 20px; text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 12px;">
-                    <p style="color: #64748b; font-size: 0.65rem; margin: 0; letter-spacing: 1px;">GERADO POR APEX FIT IA — NUTRIÇÃO DIGITAL AVANÇADA</p>
-                </div>
             </div>
         `;
 
@@ -342,16 +359,16 @@ const NutritionistChat = ({ dashboardData, onVoltar, onDietaSalva }) => {
         const opcoes = {
             margin: 0,
             filename: `apex-fit-dieta-${nome.toLowerCase().replace(/\s+/g, '-')}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, backgroundColor: '#020617', useCORS: true, windowWidth: 800 },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: ['css', 'legacy'] }
+            image: { type: 'jpeg', quality: 1.0 },
+            html2canvas: { scale: 2, backgroundColor: '#020617', useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
         html2pdf().set(opcoes).from(wrapper).save();
     };
 
-    const podeSalvarDieta = ultimaRespostaIA.length > 200 && !dietaSalva;
+    const temTagDieta = ultimaRespostaIA.includes('<DIETA_PDF>') && ultimaRespostaIA.includes('</DIETA_PDF>');
+    const podeSalvarDieta = temTagDieta && !dietaSalva;
     const podeBaixarPdf = dietaSalva || dashboardData?.savedDietPlan;
 
     return (
@@ -373,13 +390,13 @@ const NutritionistChat = ({ dashboardData, onVoltar, onDietaSalva }) => {
             {/* Area de mensagens */}
             <div className="chat-messages">
                 {mensagens.map((msg, i) => (
-                    <div key={i} className={`chat - bubble - wrapper ${msg.role === 'user' ? 'user' : 'ia'} `}>
+                    <div key={i} className={`chat-bubble-wrapper ${msg.role === 'user' ? 'user' : 'ia'}`}>
                         <div className="chat-bubble-icon">
                             {msg.role === 'user'
                                 ? <User size={16} />
                                 : <Bot size={16} />}
                         </div>
-                        <div className={`chat - bubble ${msg.role === 'user' ? 'bubble-user' : 'bubble-ia'} `}>
+                        <div className={`chat-bubble ${msg.role === 'user' ? 'bubble-user' : 'bubble-ia'}`}>
                             <FormatarMensagem texto={msg.text} />
                         </div>
                     </div>

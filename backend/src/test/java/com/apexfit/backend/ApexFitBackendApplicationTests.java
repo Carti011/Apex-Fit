@@ -8,7 +8,7 @@ import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@TestPropertySource(properties = { "openai.api.key=TEST_KEY" })
+@TestPropertySource(properties = { "gemini.api.key=TEST_KEY" })
 class ApexFitBackendApplicationTests {
 
     @Test

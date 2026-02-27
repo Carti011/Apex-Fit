@@ -944,7 +944,7 @@
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.25rem;
     background: rgba(8, 12, 20, 0.7);
     scroll-behavior: smooth;
 }
@@ -964,9 +964,23 @@
 
 .chat-bubble-wrapper {
     display: flex;
-    align-items: flex-start;
+    align-items: flex-end;
+    /* Alterado de flex-start para acompanhar organicamente o balao */
     gap: 0.6rem;
     max-width: 85%;
+    animation: messageAppear 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes messageAppear {
+    0% {
+        opacity: 0;
+        transform: translateY(15px) scale(0.97);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .chat-bubble-wrapper.user {
@@ -979,46 +993,52 @@
 }
 
 .chat-bubble-icon {
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .chat-bubble-wrapper.ia .chat-bubble-icon {
-    background: rgba(0, 255, 136, 0.15);
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 200, 100, 0.3));
     color: #00ff88;
+    border: 1px solid rgba(0, 255, 136, 0.2);
 }
 
 .chat-bubble-wrapper.user .chat-bubble-icon {
-    background: rgba(100, 100, 255, 0.15);
-    color: #8888ff;
+    background: linear-gradient(135deg, rgba(100, 100, 255, 0.2), rgba(80, 80, 220, 0.3));
+    color: #a0a0ff;
+    border: 1px solid rgba(100, 100, 255, 0.2);
 }
 
 .chat-bubble {
-    padding: 0.9rem 1.2rem;
-    border-radius: 16px;
-    font-size: 0.9rem;
-    line-height: 1.6;
+    padding: 1.25rem 1.7rem;
+    font-size: 0.95rem;
+    line-height: 1.65;
     max-width: 100%;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 .bubble-ia {
-    background: rgba(0, 255, 136, 0.06);
-    border: 1px solid rgba(0, 255, 136, 0.12);
-    color: #e0e0e0;
-    border-top-left-radius: 4px;
+    background: linear-gradient(145deg, rgba(0, 255, 136, 0.08) 0%, rgba(0, 255, 136, 0.02) 100%);
+    border: 1px solid rgba(0, 255, 136, 0.15);
+    color: #e2e8f0;
+    /* Cantos arredondados, exceto o pontiagudo perto do icone (avatar da IA fica na esquerda) */
+    border-radius: 20px 20px 20px 4px;
 }
 
 .bubble-user {
-    background: rgba(100, 100, 255, 0.12);
+    background: linear-gradient(145deg, rgba(100, 100, 255, 0.12) 0%, rgba(100, 100, 255, 0.03) 100%);
     border: 1px solid rgba(100, 100, 255, 0.2);
     color: white;
-    border-top-right-radius: 4px;
+    /* Cantos arredondados, exceto o pontiagudo perto do icone (avatar do user fica na direita) */
+    border-radius: 20px 20px 4px 20px;
 }
 
 /* Indicador de digitando */

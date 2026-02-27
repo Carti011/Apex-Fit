@@ -25,12 +25,12 @@ public class AiNutritionistService {
 
     private static final Logger log = LoggerFactory.getLogger(AiNutritionistService.class);
 
-    // Chave injetada do application.properties / application-local.properties
-    @Value("${openai.api.key}")
-    private String openAiApiKey;
+    // Chave injetada do application.properties / variáveis de ambiente
+    @Value("${gemini.api.key}")
+    private String geminiApiKey;
 
-    private static final String OPENAI_URL = "https://api.openai.com/v1/chat/completions";
-    private static final String OPENAI_MODEL = "gpt-4o-mini";
+    private static final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=";
+    private static final String GEMINI_MODEL = "gemini-2.5-flash";
 
     private final UserRepository userRepository;
     private final RestTemplate restTemplate;
@@ -48,9 +48,9 @@ public class AiNutritionistService {
                 .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
 
         String systemPrompt = montarSystemPrompt(usuario);
-        String corpoRequisicao = montarCorpoOpenAi(systemPrompt, payload.historico(), payload.novaMensagem());
+        String corpoRequisicao = montarCorpoGemini(systemPrompt, payload.historico(), payload.novaMensagem());
 
-        return chamarOpenAiApi(corpoRequisicao);
+        return chamarGeminiApi(corpoRequisicao);
     }
 
     // Monta o System Prompt com todo o contexto biologico e preferencias do usuario
@@ -230,72 +230,86 @@ public class AiNutritionistService {
                 .formatted((int) tmb, (int) get, peso, altura, idade);
     }
 
-    // Monta o corpo JSON no formato da API da OpenAI (messages array)
-    private String montarCorpoOpenAi(String systemPrompt, List<Map<String, String>> historico,
+    // Monta o corpo JSON no formato da API do Gemini (contents / parts)
+    private String montarCorpoGemini(String systemPrompt, List<Map<String, String>> historico,
             String novaMensagem) {
         try {
-            List<Map<String, Object>> messages = new ArrayList<>();
-            messages.add(Map.of("role", "system", "content", systemPrompt));
+            Map<String, Object> corpo = new LinkedHashMap<>();
+
+            // 1. System Instruction
+            Map<String, Object> systemContentMap = new LinkedHashMap<>();
+            systemContentMap.put("parts", List.of(Map.of("text", systemPrompt)));
+            corpo.put("system_instruction", systemContentMap);
+
+            // 2. Historico e nova mensagem no array "contents"
+            List<Map<String, Object>> contents = new ArrayList<>();
 
             if (historico != null) {
                 for (Map<String, String> msg : historico) {
+                    // Mapeia role (user/model)
                     String role = msg.getOrDefault("role", "user");
-                    String content = msg.getOrDefault("text", "");
-                    if ("model".equals(role))
-                        role = "assistant";
-                    Map<String, Object> m = new LinkedHashMap<>();
-                    m.put("role", role);
-                    m.put("content", content);
-                    messages.add(m);
+                    if ("assistant".equals(role))
+                        role = "model"; // Gemini usa "model" em vez de "assistant"
+
+                    String text = msg.getOrDefault("text", "");
+
+                    Map<String, Object> contentMap = new LinkedHashMap<>();
+                    contentMap.put("role", role);
+                    contentMap.put("parts", List.of(Map.of("text", text)));
+                    contents.add(contentMap);
                 }
             }
 
-            Map<String, Object> last = new LinkedHashMap<>();
-            last.put("role", "user");
-            last.put("content", novaMensagem);
-            messages.add(last);
+            // Nova mensagem do usuario
+            Map<String, Object> novaMsgMap = new LinkedHashMap<>();
+            novaMsgMap.put("role", "user");
+            novaMsgMap.put("parts", List.of(Map.of("text", novaMensagem)));
+            contents.add(novaMsgMap);
 
-            Map<String, Object> corpo = new LinkedHashMap<>();
-            corpo.put("model", OPENAI_MODEL);
-            corpo.put("messages", messages);
-            corpo.put("temperature", 0.7);
+            corpo.put("contents", contents);
 
             return objectMapper.writeValueAsString(corpo);
         } catch (Exception e) {
-            throw new RuntimeException("Erro ao serializar corpo JSON: " + e.getMessage(), e);
+            throw new RuntimeException("Erro ao serializar corpo JSON do Gemini: " + e.getMessage(), e);
         }
     }
 
-    // Chama a API da OpenAI e extrai o texto da resposta
-    private String chamarOpenAiApi(String corpoJson) {
-        log.info("[OpenAI] Chamando API com modelo {}. Key comeca com: {}",
-                OPENAI_MODEL,
-                openAiApiKey != null && openAiApiKey.length() > 8 ? openAiApiKey.substring(0, 8) + "..." : "INVALIDA");
+    // Chama a API do Gemini e extrai o texto da resposta
+    private String chamarGeminiApi(String corpoJson) {
+        log.info("[Gemini] Chamando API com modelo {}. Key comeca com: {}",
+                GEMINI_MODEL,
+                geminiApiKey != null && geminiApiKey.length() > 8 ? geminiApiKey.substring(0, 8) + "..." : "INVALIDA");
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(openAiApiKey);
+
+        // A API do Gemini recebe a key via Query Param URL e nao header auth
+        String urlFinal = GEMINI_URL + geminiApiKey;
+
         HttpEntity<String> request = new HttpEntity<>(corpoJson, headers);
 
         try {
-            ResponseEntity<String> response = restTemplate.postForEntity(OPENAI_URL, request, String.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(urlFinal, request, String.class);
 
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
                 JsonNode root = objectMapper.readTree(response.getBody());
-                return root.path("choices").get(0).path("message").path("content").asText();
+                // O Gemini retorna: { candidates: [ { content: { parts: [ { text: "..." } ] } }
+                // ] }
+                JsonNode candidate = root.path("candidates").get(0);
+                return candidate.path("content").path("parts").get(0).path("text").asText();
             }
-            throw new RuntimeException("OpenAI retornou status inesperado: " + response.getStatusCode());
+            throw new RuntimeException("Gemini retornou status inesperado: " + response.getStatusCode());
 
         } catch (HttpClientErrorException e) {
-            log.error("[OpenAI] Erro HTTP {}: {}", e.getStatusCode(), e.getResponseBodyAsString());
-            throw new RuntimeException("Erro na API OpenAI [" + e.getStatusCode() + "]: " + e.getResponseBodyAsString(),
+            log.error("[Gemini] Erro HTTP {}: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("Erro na API Gemini [" + e.getStatusCode() + "]: " + e.getResponseBodyAsString(),
                     e);
         } catch (RuntimeException e) {
-            log.error("[OpenAI] Erro: {}", e.getMessage());
+            log.error("[Gemini] Erro: {}", e.getMessage());
             throw e;
         } catch (Exception e) {
-            log.error("[OpenAI] Erro inesperado: {}", e.getMessage(), e);
-            throw new RuntimeException("Erro inesperado ao chamar OpenAI: " + e.getMessage(), e);
+            log.error("[Gemini] Erro inesperado: {}", e.getMessage(), e);
+            throw new RuntimeException("Erro inesperado ao chamar Gemini: " + e.getMessage(), e);
         }
     }
 
