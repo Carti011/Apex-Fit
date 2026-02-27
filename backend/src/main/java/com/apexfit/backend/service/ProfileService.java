@@ -50,7 +50,7 @@ public class ProfileService {
                 User user = userRepository.findByEmail(email)
                                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-                boolean isFirstTimeSetup = (user.getWeight() == null); // Reward for initial setup
+                boolean isFirstTimeSetup = (user.getWeight() == null);
 
                 user.setBirthDate(bioDto.birthDate());
                 user.setWeight(bioDto.weight());
@@ -60,7 +60,16 @@ public class ProfileService {
                 user.setActivityLevel(bioDto.activityLevel());
                 user.setGoal(bioDto.goal());
 
-                // Grant 50 XP if they are setting up their profile for the first time
+                // Preferencias de dieta (podem ser nulas — usuario atualiza quando quiser)
+                if (bioDto.dietaryRestrictions() != null)
+                        user.setDietaryRestrictions(bioDto.dietaryRestrictions());
+                if (bioDto.foodDislikes() != null)
+                        user.setFoodDislikes(bioDto.foodDislikes());
+                if (bioDto.numberOfMeals() != null)
+                        user.setNumberOfMeals(bioDto.numberOfMeals());
+                if (bioDto.foodFavorites() != null)
+                        user.setFoodFavorites(bioDto.foodFavorites());
+
                 if (isFirstTimeSetup) {
                         user = gamificationService.addXp(user, 50);
                 } else {
@@ -88,7 +97,11 @@ public class ProfileService {
                                 user.getGender(),
                                 user.getBodyFatPercentage(),
                                 user.getActivityLevel(),
-                                user.getGoal());
+                                user.getGoal(),
+                                user.getDietaryRestrictions(),
+                                user.getFoodDislikes(),
+                                user.getNumberOfMeals(),
+                                user.getFoodFavorites());
 
                 NutritionPlanDTO nutrition = calculatorService.calculate(user);
 
@@ -103,6 +116,16 @@ public class ProfileService {
                                 user.isDietGoalMet(),
                                 user.isWorkoutGoalMet(),
                                 bio,
-                                nutrition);
+                                nutrition,
+                                user.getSavedDietPlan());
+        }
+
+        // Persiste a dieta aprovada pelo usuario no banco
+        public DashboardDataDTO salvarDieta(String email, String dietaPlan) {
+                User user = userRepository.findByEmail(email)
+                                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+                user.setSavedDietPlan(dietaPlan);
+                user = userRepository.save(user);
+                return getDashboardData(user);
         }
 }

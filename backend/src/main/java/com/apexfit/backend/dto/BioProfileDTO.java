@@ -7,11 +7,15 @@ import com.apexfit.backend.model.enums.Goal;
 import java.time.LocalDate;
 
 public record BioProfileDTO(
-        LocalDate birthDate,
-        Double weight,
-        Double height,
-        Gender gender,
-        Double bodyFatPercentage,
-        ActivityLevel activityLevel,
-        Goal goal) {
+                LocalDate birthDate,
+                Double weight,
+                Double height,
+                Gender gender,
+                Double bodyFatPercentage,
+                ActivityLevel activityLevel,
+                Goal goal,
+                String dietaryRestrictions,
+                String foodDislikes,
+                Integer numberOfMeals,
+                String foodFavorites) {
 }
