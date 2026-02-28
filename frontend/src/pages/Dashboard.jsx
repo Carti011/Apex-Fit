@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Activity, Target, User, Utensils, LogOut, ShieldCheck, X } from 'lucide-react';
+import { Activity, Target, User, Utensils, LogOut, ShieldCheck, X, ChevronRight } from 'lucide-react';
 import EvolutionPanel from '../components/dashboard/EvolutionPanel';
 import DailyQuests from '../components/dashboard/DailyQuests';
 import BioProfileForm from '../components/dashboard/BioProfileForm';
 import NutritionPlan from '../components/dashboard/NutritionPlan';
 import AccountSettings from '../components/dashboard/AccountSettings';
+import OnboardingWizard from '../components/dashboard/OnboardingWizard';
 import { api } from '../services/api';
 import './Dashboard.css';
 
@@ -28,6 +29,7 @@ const Dashboard = () => {
     const [showTitlesModal, setShowTitlesModal] = useState(false);
     const [prevLevel, setPrevLevel] = useState(null);
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+    const [isChatOpen, setIsChatOpen] = useState(false);
 
     const showToast = (message, type = 'success') => {
         setToast({ show: true, message, type });
@@ -87,6 +89,17 @@ const Dashboard = () => {
         }
     };
 
+    // Onboarding: salva perfil e libera o dashboard
+    const handleOnboardingComplete = async (bioPayload) => {
+        try {
+            const updatedData = await api.updateBioProfile(user.token, bioPayload);
+            setDashboardData(updatedData);
+            showToast('Perfil configurado! Bem-vindo ao Apex Fit 🔥');
+        } catch (error) {
+            console.error('Erro no onboarding:', error);
+        }
+    };
+
     const handleQuestComplete = async (questType) => {
         try {
             const updatedData = await api.completeQuest(user.token, questType);
@@ -116,7 +129,15 @@ const Dashboard = () => {
             case 'profile':
                 return <BioProfileForm user={dashboardData} onUpdate={handleProfileUpdate} />;
             case 'diet':
-                return <NutritionPlan nutrition={dashboardData?.nutritionPlan} />;
+                return <NutritionPlan
+                    nutrition={dashboardData?.nutritionPlan}
+                    dashboardData={{ ...user, ...dashboardData }}
+                    onDietaSalva={(novosDados) => {
+                        if (novosDados) setDashboardData(novosDados);
+                    }}
+                    onChatOpen={() => setIsChatOpen(true)}
+                    onChatClose={() => setIsChatOpen(false)}
+                />;
             case 'account':
                 return <AccountSettings user={{ ...user, ...dashboardData }} onUpdateSuccess={(newData) => {
                     if (newData) setDashboardData(newData);
@@ -127,8 +148,15 @@ const Dashboard = () => {
         }
     };
 
+    // Perfil incompleto = nutritionPlan nulo (dados biometricos nao preenchidos)
+    const perfilIncompleto = !loading && dashboardData && !dashboardData.nutritionPlan;
+
     return (
-        <div className="dashboard-layout">
+        <div className={`dashboard-layout${isChatOpen ? ' chat-fullscreen' : ''}`}>
+            {/* Onboarding obrigatorio — bloqueia ate perfil ser preenchido */}
+            {perfilIncompleto && (
+                <OnboardingWizard onComplete={handleOnboardingComplete} />
+            )}
             {/* Sidebar */}
             <aside className="dashboard-sidebar">
                 <div className="sidebar-header" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
@@ -153,7 +181,7 @@ const Dashboard = () => {
                     </button>
 
                     <button
-                        className={`sidebar-link ${activeTab === 'profile' ? 'active' : ''}`}
+                        className={`sidebar-link desktop-only ${activeTab === 'profile' ? 'active' : ''}`}
                         onClick={() => setActiveTab('profile')}
                     >
                         <User size={20} />
@@ -169,7 +197,7 @@ const Dashboard = () => {
                     </button>
 
                     <button
-                        className={`sidebar-link ${activeTab === 'account' ? 'active' : ''}`}
+                        className={`sidebar-link desktop-only ${activeTab === 'account' ? 'active' : ''}`}
                         onClick={() => setActiveTab('account')}
                     >
                         <ShieldCheck size={20} />
@@ -294,6 +322,39 @@ const Dashboard = () => {
                 </div>
                 <div className="toast-text">{toast.message}</div>
             </div>
+            {/* Bottom Nav — Mobile Only */}
+            <nav className="bottom-nav">
+                <button
+                    className={`bottom-nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('dashboard')}
+                >
+                    <Activity size={22} />
+                    <span>Evolução</span>
+                </button>
+                <button
+                    className={`bottom-nav-item ${activeTab === 'quests' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('quests')}
+                >
+                    <Target size={22} />
+                    <span>Missões</span>
+                </button>
+                <button
+                    className={`bottom-nav-item ${activeTab === 'diet' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('diet')}
+                >
+                    <Utensils size={22} />
+                    <span>Dieta</span>
+                </button>
+                <button
+                    className={`bottom-nav-item ${activeTab === 'account' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('account')}
+                >
+                    <div className="bottom-nav-avatar">
+                        {user?.name?.charAt(0) || 'U'}
+                    </div>
+                    <span>Conta</span>
+                </button>
+            </nav>
         </div>
     );
 };

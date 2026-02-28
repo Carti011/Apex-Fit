@@ -77,6 +77,21 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Goal goal;
 
+    // Campos do Agente Nutricionista de IA
+    @Column(columnDefinition = "TEXT")
+    private String dietaryRestrictions; // alimentos proibidos/alergias
+
+    @Column(columnDefinition = "TEXT")
+    private String foodDislikes; // alimentos que a pessoa nao gosta
+
+    @Column(columnDefinition = "TEXT")
+    private String savedDietPlan; // ultima dieta aprovada pelo usuario (JSON/texto)
+
+    private Integer numberOfMeals; // quantas refeicoes por dia (3, 4, 5, 6...)
+
+    @Column(columnDefinition = "TEXT")
+    private String foodFavorites; // alimentos que ama / quer incluir obrigatoriamente na dieta
+
     public User() {
     }
 
@@ -275,6 +290,46 @@ public class User {
 
     public void setGoal(Goal goal) {
         this.goal = goal;
+    }
+
+    public String getDietaryRestrictions() {
+        return dietaryRestrictions;
+    }
+
+    public void setDietaryRestrictions(String dietaryRestrictions) {
+        this.dietaryRestrictions = dietaryRestrictions;
+    }
+
+    public String getFoodDislikes() {
+        return foodDislikes;
+    }
+
+    public void setFoodDislikes(String foodDislikes) {
+        this.foodDislikes = foodDislikes;
+    }
+
+    public String getSavedDietPlan() {
+        return savedDietPlan;
+    }
+
+    public void setSavedDietPlan(String savedDietPlan) {
+        this.savedDietPlan = savedDietPlan;
+    }
+
+    public Integer getNumberOfMeals() {
+        return numberOfMeals;
+    }
+
+    public void setNumberOfMeals(Integer numberOfMeals) {
+        this.numberOfMeals = numberOfMeals;
+    }
+
+    public String getFoodFavorites() {
+        return foodFavorites;
+    }
+
+    public void setFoodFavorites(String foodFavorites) {
+        this.foodFavorites = foodFavorites;
     }
 
     @Override

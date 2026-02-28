@@ -44,13 +44,13 @@ class GamificationControllerTest {
     void setUp() {
         BioProfileDTO bio = new BioProfileDTO(
                 LocalDate.now().minusYears(25), 80.0, 180.0, com.apexfit.backend.model.enums.Gender.MALE,
-                15.0, ActivityLevel.ACTIVE, Goal.GAIN_MUSCLE);
+                15.0, ActivityLevel.ACTIVE, Goal.GAIN_MUSCLE, null, null, null, null);
 
         mockDashboard = new DashboardDataDTO(
                 "Test User", "test@email.com",
                 2, 50, 200, 5, true, false, false,
                 bio,
-                null);
+                null, null);
     }
 
     @Test

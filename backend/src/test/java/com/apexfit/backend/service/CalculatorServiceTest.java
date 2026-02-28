@@ -96,4 +96,34 @@ class CalculatorServiceTest {
         assertEquals(80, plan.fats());
         assertEquals(76, plan.carbs());
     }
+
+    @Test
+    void calculate_UsesMifflinFemale_AndAdjustsForGainMuscle() {
+        User user = new User();
+        user.setBirthDate(LocalDate.now().minusYears(30)); // 30 years old
+        user.setWeight(60.0);
+        user.setHeight(165.0);
+        user.setGender(Gender.FEMALE);
+        user.setActivityLevel(ActivityLevel.LIGHT); // factor: 1.375
+        user.setGoal(Goal.GAIN_MUSCLE); // GET + 250
+
+        // Mifflin (Female): (10 * 60) + (6.25 * 165) - (5 * 30) - 161
+        // 600 + 1031.25 - 150 - 161 = 1320.25 -> 1320
+        // GET: 1320.25 * 1.375 = 1815.34
+        // Adjust GAIN_MUSCLE: 1815.34 + 250 = 2065.34 -> 2065
+
+        NutritionPlanDTO plan = calculatorService.calculate(user);
+
+        assertNotNull(plan);
+        assertEquals(1320, plan.tmb());
+        assertEquals(2065, plan.get());
+
+        // Macros:
+        // Protein (2g/kg): 120g (480 kcal)
+        // Fats (1g/kg): 60g (540 kcal)
+        // Remainder: 2065 - (480 + 540) = 2065 - 1020 = 1045 kcal / 4 = 261.25g Carbs
+        assertEquals(120, plan.protein());
+        assertEquals(60, plan.fats());
+        assertEquals(261, plan.carbs());
+    }
 }

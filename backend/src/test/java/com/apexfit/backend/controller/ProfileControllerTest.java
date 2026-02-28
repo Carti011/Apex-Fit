@@ -34,7 +34,7 @@ class ProfileControllerTest {
 
         DashboardDataDTO mockDashboard = new DashboardDataDTO(
                 "Test User", "test@email.com",
-                1, 0, 100, 0, false, false, false, null, null);
+                1, 0, 100, 0, false, false, false, null, null, null);
 
         when(profileService.getDashboardDataByEmail(email)).thenReturn(mockDashboard);
 
@@ -51,11 +51,11 @@ class ProfileControllerTest {
         when(authentication.getName()).thenReturn(email);
 
         BioProfileDTO bioDto = new BioProfileDTO(
-                null, 80.0, 180.0, null, null, null, null);
+                null, 80.0, 180.0, null, null, null, null, null, null, null, null);
 
         DashboardDataDTO mockDashboard = new DashboardDataDTO(
                 "Test User", "test@email.com",
-                1, 50, 100, 0, false, false, false, bioDto, null);
+                1, 50, 100, 0, false, false, false, bioDto, null, null);
 
         when(profileService.updateBioProfile(email, bioDto)).thenReturn(mockDashboard);
 
@@ -75,7 +75,7 @@ class ProfileControllerTest {
 
         DashboardDataDTO mockDashboard = new DashboardDataDTO(
                 "New Name", "test@email.com",
-                1, 50, 100, 0, false, false, false, null, null);
+                1, 50, 100, 0, false, false, false, null, null, null);
 
         when(profileService.updateAccountProfile(email, accountDto)).thenReturn(mockDashboard);
 

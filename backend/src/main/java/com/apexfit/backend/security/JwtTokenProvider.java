@@ -4,6 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -13,6 +15,8 @@ import java.util.Date;
 
 @Component
 public class JwtTokenProvider {
+
+    private static final Logger log = LoggerFactory.getLogger(JwtTokenProvider.class);
 
     @Value("${app.jwt.secret:MySuperSecretKeyForApexFitApplicationWhichShouldBeVeryLongAndSecure}")
     private String jwtSecret;
@@ -46,15 +50,21 @@ public class JwtTokenProvider {
         return claims.getSubject();
     }
 
+    // Corrigido: usa parseClaimsJws (verifica assinatura + expiracao)
+    // O metodo anterior usava parse() que nao validava a assinatura corretamente
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
                     .setSigningKey(key())
                     .build()
-                    .parse(token);
+                    .parseClaimsJws(token); // <-- corrigido de parse() para parseClaimsJws()
             return true;
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            log.warn("JWT expirado: {}", e.getMessage());
+        } catch (io.jsonwebtoken.security.SecurityException e) {
+            log.warn("Assinatura JWT invalida: {}", e.getMessage());
         } catch (Exception e) {
-            // Log e
+            log.warn("JWT invalido: {}", e.getMessage());
         }
         return false;
     }

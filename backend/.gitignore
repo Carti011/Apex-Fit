@@ -1,2 +1,6 @@
 .m2_local/
 *.log
+
+# Perfil local com chaves secretas (nunca commitar)
+application-local.properties
+src/main/resources/application-local.properties

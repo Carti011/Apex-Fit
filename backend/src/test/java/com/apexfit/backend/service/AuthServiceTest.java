@@ -80,4 +80,29 @@ public class AuthServiceTest {
         assertEquals("jwt-token", response.token());
         assertEquals("Test User", response.name());
     }
+
+    @Test
+    void shouldThrowExceptionWhenRegisteringExistingEmail() {
+        when(userRepository.existsByEmail(registerDTO.getEmail())).thenReturn(true);
+
+        RuntimeException exception = org.junit.jupiter.api.Assertions.assertThrows(
+                RuntimeException.class,
+                () -> authService.register(registerDTO));
+
+        assertEquals("Email já cadastrado", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenLoginUserNotFound() {
+        Authentication authentication = org.mockito.Mockito.mock(Authentication.class);
+        when(authenticationManager.authenticate(any())).thenReturn(authentication);
+        when(jwtTokenProvider.generateToken(authentication)).thenReturn("jwt-token");
+        when(userRepository.findByEmail(loginDTO.email())).thenReturn(Optional.empty());
+
+        RuntimeException exception = org.junit.jupiter.api.Assertions.assertThrows(
+                RuntimeException.class,
+                () -> authService.login(loginDTO));
+
+        assertEquals("User not found", exception.getMessage());
+    }
 }

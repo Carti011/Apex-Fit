@@ -62,7 +62,8 @@ class ProfileServiceTest {
                 Gender.MALE,
                 15.0,
                 ActivityLevel.ACTIVE,
-                Goal.GAIN_MUSCLE);
+                Goal.GAIN_MUSCLE,
+                null, null, null, null);
 
         mockNutrition = new NutritionPlanDTO(2000, 2500, 160, 200, 80);
     }
