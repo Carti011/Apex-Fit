@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { api } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 const WeeklyChart = () => {
+    const { user } = useAuth();
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchHistory = async () => {
             try {
-                const token = localStorage.getItem('token');
+                const token = user?.token;
                 if (!token) return;
 
                 const response = await api.getGamificationHistory(token);
@@ -22,7 +24,7 @@ const WeeklyChart = () => {
         };
 
         fetchHistory();
-    }, []);
+    }, [user?.token]);
 
     if (loading) {
         return <div style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>Carregando gráfico...</div>;
