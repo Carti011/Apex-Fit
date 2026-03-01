@@ -1,6 +1,7 @@
 package com.apexfit.backend.controller;
 
 import com.apexfit.backend.dto.AiChatMessageDTO;
+import com.apexfit.backend.dto.SaveDietDTO;
 import com.apexfit.backend.dto.DashboardDataDTO;
 import com.apexfit.backend.service.AiNutritionistService;
 import com.apexfit.backend.service.ProfileService;
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -31,7 +33,7 @@ public class AiController {
     @PostMapping("/chat")
     public ResponseEntity<Map<String, String>> chat(
             Authentication authentication,
-            @RequestBody AiChatMessageDTO payload) {
+            @Valid @RequestBody AiChatMessageDTO payload) {
         try {
             String email = authentication.getName();
             String resposta = aiNutritionistService.chat(email, payload);
@@ -49,10 +51,9 @@ public class AiController {
     @PutMapping("/salvar-dieta")
     public ResponseEntity<DashboardDataDTO> salvarDieta(
             Authentication authentication,
-            @RequestBody Map<String, String> body) {
+            @RequestBody SaveDietDTO body) {
         String email = authentication.getName();
-        String plano = body.get("dietaPlan");
-        DashboardDataDTO atualizado = profileService.salvarDieta(email, plano);
+        DashboardDataDTO atualizado = profileService.salvarDieta(email, body.dietaPlan());
         return ResponseEntity.ok(atualizado);
     }
 }
