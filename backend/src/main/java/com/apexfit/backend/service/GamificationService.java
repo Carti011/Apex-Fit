@@ -4,6 +4,7 @@ import com.apexfit.backend.model.User;
 import com.apexfit.backend.model.XpHistory;
 import com.apexfit.backend.repository.UserRepository;
 import com.apexfit.backend.repository.XpHistoryRepository;
+import com.apexfit.backend.exception.UserNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -129,7 +130,7 @@ public class GamificationService {
      */
     public User completeQuest(String email, String questType) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(email));
 
         // Ensure quests are reset today before checking completeness
         user = processDailyActivity(user);
@@ -173,7 +174,7 @@ public class GamificationService {
      */
     public java.util.List<com.apexfit.backend.dto.XpHistoryDTO> getWeeklyXpHistory(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(email));
 
         LocalDate today = LocalDate.now();
 

@@ -3,8 +3,10 @@ package com.apexfit.backend.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.apexfit.backend.dto.AiChatMessageDTO;
+import com.apexfit.backend.dto.NutritionPlanDTO;
 import com.apexfit.backend.model.User;
 import com.apexfit.backend.repository.UserRepository;
+import com.apexfit.backend.service.CalculatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +16,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
+import com.apexfit.backend.exception.UserNotFoundException;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -33,11 +36,13 @@ public class AiNutritionistService {
     private static final String GEMINI_MODEL = "gemini-2.5-flash";
 
     private final UserRepository userRepository;
+    private final CalculatorService calculatorService;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public AiNutritionistService(UserRepository userRepository) {
+    public AiNutritionistService(UserRepository userRepository, CalculatorService calculatorService) {
         this.userRepository = userRepository;
+        this.calculatorService = calculatorService;
         this.restTemplate = new RestTemplate();
     }
 
@@ -45,7 +50,7 @@ public class AiNutritionistService {
     // e a nova mensagem
     public String chat(String emailUsuario, AiChatMessageDTO payload) {
         User usuario = userRepository.findByEmail(emailUsuario)
-                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+                .orElseThrow(() -> new UserNotFoundException(emailUsuario));
 
         String systemPrompt = montarSystemPrompt(usuario);
         String corpoRequisicao = montarCorpoGemini(systemPrompt, payload.historico(), payload.novaMensagem());
@@ -191,43 +196,15 @@ public class AiNutritionistService {
                         dietaAtual);
     }
 
-    // Calcula TMB e GET para incluir no contexto da IA
+    // Calcula TMB e GET via CalculatorService para incluir no contexto da IA
     private String calcularDadosMetabolicos(User usuario) {
-        if (usuario.getWeight() == null || usuario.getHeight() == null ||
-                usuario.getBirthDate() == null || usuario.getGender() == null ||
-                usuario.getActivityLevel() == null) {
+        NutritionPlanDTO plan = calculatorService.calculate(usuario);
+        if (plan == null) {
             return "Dados metabolicos: perfil biologico incompleto.";
         }
-
         int idade = Period.between(usuario.getBirthDate(), LocalDate.now()).getYears();
-        double peso = usuario.getWeight();
-        double altura = usuario.getHeight();
-        double tmb;
-
-        if (usuario.getBodyFatPercentage() != null && usuario.getBodyFatPercentage() > 0) {
-            double massaMagra = peso * (1 - (usuario.getBodyFatPercentage() / 100.0));
-            tmb = 370 + (21.6 * massaMagra);
-        } else {
-            if (usuario.getGender().name().equals("MALE")) {
-                tmb = (10 * peso) + (6.25 * altura) - (5 * idade) + 5;
-            } else {
-                tmb = (10 * peso) + (6.25 * altura) - (5 * idade) - 161;
-            }
-        }
-
-        double get = tmb * usuario.getActivityLevel().getFactor();
-
-        if (usuario.getGoal() != null) {
-            switch (usuario.getGoal()) {
-                case LOSE_WEIGHT -> get -= 500;
-                case GAIN_MUSCLE -> get += 250;
-                default -> {
-                }
-            }
-        }
-
         return "TMB: %d kcal | GET (com objetivo): %d kcal | Peso: %.1f kg | Altura: %.0f cm | Idade: %d anos"
-                .formatted((int) tmb, (int) get, peso, altura, idade);
+                .formatted(plan.tmb(), plan.get(), usuario.getWeight(), usuario.getHeight(), idade);
     }
 
     // Monta o corpo JSON no formato da API do Gemini (contents / parts)
