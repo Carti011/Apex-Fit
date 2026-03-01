@@ -17,13 +17,14 @@ describe('parseDietText', () => {
         expect(result.emissionDate).toBe('28/02/2026');
     });
 
-    it('extrai conteúdo dentro da tag <DIETA_PDF> ignorando texto fora', () => {
+    it('extrai refeições de dentro da tag <DIETA_PDF> e captura texto pré-tag como headerLines', () => {
         const texto = 'Texto introdutório da IA que não deve aparecer.\n<DIETA_PDF>\n## Refeição 1\n- Frango 200g\n</DIETA_PDF>\nTexto final ignorado.';
         const result = parseDietText(texto, 'João', '01/01/2026');
+        // Refeições vêm apenas de dentro da tag
         expect(result.meals.length).toBe(1);
         expect(result.meals[0].title).toContain('Refeição 1');
-        // Texto fora da tag não deve estar em headerLines
-        expect(result.headerLines.join('')).not.toContain('introdutório');
+        // Texto pré-tag é capturado como headerLines (protocolo/resumo da IA)
+        expect(result.headerLines.join('')).toContain('introdutório');
     });
 
     it('identifica itens de refeição com bullets de hífen', () => {
