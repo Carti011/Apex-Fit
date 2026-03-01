@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Activity, Target, User, Utensils, LogOut, ShieldCheck, X, ChevronRight } from 'lucide-react';
 import EvolutionPanel from '../components/dashboard/EvolutionPanel';
 import DailyQuests from '../components/dashboard/DailyQuests';
@@ -9,6 +9,9 @@ import NutritionPlan from '../components/dashboard/NutritionPlan';
 import AccountSettings from '../components/dashboard/AccountSettings';
 import OnboardingWizard from '../components/dashboard/OnboardingWizard';
 import { api } from '../services/api';
+import { useDashboard } from '../hooks/useDashboard';
+import { useToast } from '../hooks/useToast';
+import { sons } from '../utils/soundEffects';
 import './Dashboard.css';
 
 const getUserTitle = (level) => {
@@ -22,19 +25,15 @@ const getUserTitle = (level) => {
 const Dashboard = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState('dashboard');
-    const [dashboardData, setDashboardData] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const activeTab = searchParams.get('tab') || 'dashboard';
+    const navigateToTab = (tab) => setSearchParams({ tab });
     const [showLevelUp, setShowLevelUp] = useState(false);
     const [showTitlesModal, setShowTitlesModal] = useState(false);
-    const [prevLevel, setPrevLevel] = useState(null);
-    const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
     const [isChatOpen, setIsChatOpen] = useState(false);
 
-    const showToast = (message, type = 'success') => {
-        setToast({ show: true, message, type });
-        setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
-    };
+    const { dashboardData, setDashboardData, loading, prevLevel, setPrevLevel } = useDashboard(user);
+    const { toast, showToast } = useToast();
 
     // Merge Auth user with fresh DashboardData
     const activeData = { ...user, ...dashboardData };
@@ -48,23 +47,6 @@ const Dashboard = () => {
     const progressInLevel = Math.max(0, currentXp - base);
     const percent = Math.min(100, (progressInLevel / gap) * 100);
 
-    useEffect(() => {
-        const fetchDashboardInfo = async () => {
-            if (!user || !user.token) return;
-            try {
-                const data = await api.getDashboard(user.token);
-                setDashboardData(data);
-                if (data.level) setPrevLevel(data.level);
-            } catch (error) {
-                console.error("Erro ao carregar dashboard", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchDashboardInfo();
-    }, [user]);
-
     const handleLogout = () => {
         logout();
         navigate('/');
@@ -76,26 +58,43 @@ const Dashboard = () => {
 
             // Check for Level Up!
             if (prevLevel && updatedData.level > prevLevel) {
+                sons.levelUp();
                 setShowLevelUp(true);
             }
 
             setPrevLevel(updatedData.level);
             setDashboardData(updatedData);
             showToast("Perfil biológico salvo com sucesso!");
-            setActiveTab('diet'); // Redireciona para a aba de dieta para ver os resultados
+            navigateToTab('diet');
         } catch (error) {
-            showToast("Erro ao salvar perfil. Verifique os dados.", "error");
+            if (error.message === 'SESSION_EXPIRED') {
+                showToast("Sessão expirada. Faça login novamente.", "error");
+                setTimeout(() => { logout(); navigate('/login'); }, 2000);
+            } else {
+                showToast("Erro ao salvar perfil. Verifique os dados.", "error");
+            }
             console.error(error);
         }
     };
 
     // Onboarding: salva perfil e libera o dashboard
     const handleOnboardingComplete = async (bioPayload) => {
+        if (!user?.token) {
+            showToast('Sessão não encontrada. Faça login novamente.', 'error');
+            setTimeout(() => { logout(); navigate('/login'); }, 2000);
+            return;
+        }
         try {
             const updatedData = await api.updateBioProfile(user.token, bioPayload);
             setDashboardData(updatedData);
             showToast('Perfil configurado! Bem-vindo ao Apex Fit 🔥');
         } catch (error) {
+            if (error.message === 'SESSION_EXPIRED') {
+                showToast('Sessão expirada. Faça login novamente.', 'error');
+                setTimeout(() => { logout(); navigate('/login'); }, 2000);
+            } else {
+                showToast('Erro ao salvar perfil. Verifique os dados e tente novamente.', 'error');
+            }
             console.error('Erro no onboarding:', error);
         }
     };
@@ -106,6 +105,7 @@ const Dashboard = () => {
 
             // Check for Level Up
             if (prevLevel && updatedData.level > prevLevel) {
+                sons.levelUp();
                 setShowLevelUp(true);
             }
 
@@ -123,7 +123,7 @@ const Dashboard = () => {
 
         switch (activeTab) {
             case 'dashboard':
-                return <EvolutionPanel user={{ ...user, ...dashboardData }} onNavigate={setActiveTab} />;
+                return <EvolutionPanel user={{ ...user, ...dashboardData }} onNavigate={navigateToTab} />;
             case 'quests':
                 return <DailyQuests user={{ ...user, ...dashboardData }} onQuestComplete={handleQuestComplete} />;
             case 'profile':
@@ -141,10 +141,10 @@ const Dashboard = () => {
             case 'account':
                 return <AccountSettings user={{ ...user, ...dashboardData }} onUpdateSuccess={(newData) => {
                     if (newData) setDashboardData(newData);
-                    setActiveTab('dashboard');
+                    navigateToTab('dashboard');
                 }} />;
             default:
-                return <EvolutionPanel user={{ ...user, ...dashboardData }} onNavigate={setActiveTab} />;
+                return <EvolutionPanel user={{ ...user, ...dashboardData }} onNavigate={navigateToTab} />;
         }
     };
 
@@ -166,7 +166,7 @@ const Dashboard = () => {
                 <nav className="sidebar-nav">
                     <button
                         className={`sidebar-link ${activeTab === 'dashboard' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('dashboard')}
+                        onClick={() => navigateToTab('dashboard')}
                     >
                         <Activity size={20} />
                         <span>Evolução</span>
@@ -174,7 +174,7 @@ const Dashboard = () => {
 
                     <button
                         className={`sidebar-link ${activeTab === 'quests' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('quests')}
+                        onClick={() => navigateToTab('quests')}
                     >
                         <Target size={20} />
                         <span>Missões</span>
@@ -182,7 +182,7 @@ const Dashboard = () => {
 
                     <button
                         className={`sidebar-link desktop-only ${activeTab === 'profile' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('profile')}
+                        onClick={() => navigateToTab('profile')}
                     >
                         <User size={20} />
                         <span>Perfil</span>
@@ -190,7 +190,7 @@ const Dashboard = () => {
 
                     <button
                         className={`sidebar-link ${activeTab === 'diet' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('diet')}
+                        onClick={() => navigateToTab('diet')}
                     >
                         <Utensils size={20} />
                         <span>Dieta</span>
@@ -198,7 +198,7 @@ const Dashboard = () => {
 
                     <button
                         className={`sidebar-link desktop-only ${activeTab === 'account' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('account')}
+                        onClick={() => navigateToTab('account')}
                     >
                         <ShieldCheck size={20} />
                         <span>Conta</span>
@@ -219,7 +219,7 @@ const Dashboard = () => {
                 <header className="dashboard-header">
                     <div
                         className="user-welcome interactive-card"
-                        onClick={() => setActiveTab('account')}
+                        onClick={() => navigateToTab('account')}
                         style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.5rem', borderRadius: '12px' }}
                         title="Editar Configurações de Conta"
                     >
@@ -326,28 +326,28 @@ const Dashboard = () => {
             <nav className="bottom-nav">
                 <button
                     className={`bottom-nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('dashboard')}
+                    onClick={() => navigateToTab('dashboard')}
                 >
                     <Activity size={22} />
                     <span>Evolução</span>
                 </button>
                 <button
                     className={`bottom-nav-item ${activeTab === 'quests' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('quests')}
+                    onClick={() => navigateToTab('quests')}
                 >
                     <Target size={22} />
                     <span>Missões</span>
                 </button>
                 <button
                     className={`bottom-nav-item ${activeTab === 'diet' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('diet')}
+                    onClick={() => navigateToTab('diet')}
                 >
                     <Utensils size={22} />
                     <span>Dieta</span>
                 </button>
                 <button
                     className={`bottom-nav-item ${activeTab === 'account' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('account')}
+                    onClick={() => navigateToTab('account')}
                 >
                     <div className="bottom-nav-avatar">
                         {user?.name?.charAt(0) || 'U'}

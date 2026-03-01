@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
     User, Mail, Lock, ShieldCheck, Eye, EyeOff,
-    ChevronDown, ChevronUp, Weight, Ruler, Droplet,
+    ChevronDown, Weight, Ruler, Droplet,
     Calendar, Target, Activity, Save, Info, LogOut
 } from 'lucide-react';
 import { api } from '../../services/api';
@@ -9,10 +9,13 @@ import { useAuth } from '../../context/AuthContext';
 import './AccountSettings.css';
 
 // Componente de seção colapsável reutilizável
-const SecaoColapsavel = ({ titulo, icone: Icone, descricao, cor = 'var(--accent-color)', defaultOpen = false, children }) => {
+const SecaoColapsavel = ({ titulo, icone: Icone, descricao, cor = '#00ff88', defaultOpen = false, children }) => {
     const [aberta, setAberta] = useState(defaultOpen);
     return (
-        <div className="settings-section glass">
+        <div
+            className={`settings-section${aberta ? ' is-open' : ''}`}
+            style={{ '--secao-cor': cor }}
+        >
             <button
                 type="button"
                 className="secao-toggle"
@@ -20,13 +23,23 @@ const SecaoColapsavel = ({ titulo, icone: Icone, descricao, cor = 'var(--accent-
                 aria-expanded={aberta}
             >
                 <div className="secao-toggle-left">
-                    {Icone && <Icone size={20} style={{ color: cor }} />}
-                    <div>
-                        <h3 className="section-title" style={{ marginBottom: '0.1rem' }}>{titulo}</h3>
-                        {descricao && <p className="section-desc" style={{ margin: 0 }}>{descricao}</p>}
+                    {Icone && (
+                        <div className="secao-icon-badge" style={{
+                            background: `${cor}1a`,
+                            border: `1px solid ${cor}33`,
+                            color: cor,
+                        }}>
+                            <Icone size={18} />
+                        </div>
+                    )}
+                    <div className="secao-texto">
+                        <h3 className="section-title">{titulo}</h3>
+                        {descricao && <p className="section-desc">{descricao}</p>}
                     </div>
                 </div>
-                {aberta ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                <div className={`secao-chevron${aberta ? ' open' : ''}`}>
+                    <ChevronDown size={16} />
+                </div>
             </button>
             {aberta && <div className="secao-conteudo">{children}</div>}
         </div>
@@ -141,12 +154,31 @@ const AccountSettings = ({ user, onUpdateSuccess }) => {
         } catch { /* silencioso */ }
     };
 
+    const nivel = user?.level || 1;
+    const getUserTitle = (lvl) => {
+        if (lvl >= 100) return '🏆 Lenda do Apex Fit';
+        if (lvl >= 50) return '👑 Elite';
+        if (lvl >= 25) return '🏋️ Atleta Focado';
+        if (lvl >= 10) return '🏃 Amador';
+        return '🌱 Iniciante';
+    };
+
     return (
         <div className="account-settings-container slide-up-fade">
-            <div className="settings-header">
-                <User size={32} className="text-emerald-400" />
-                <h2>Minha Conta</h2>
-                <p>Gerencie suas informações de acesso e dados biológicos.</p>
+            {/* ─── Card de Perfil ─── */}
+            <div className="profile-hero-card">
+                <div className="profile-hero-avatar">
+                    {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                </div>
+                <div className="profile-hero-info">
+                    <h2 className="profile-hero-name">{user?.name || 'Usuário'}</h2>
+                    <span className="profile-hero-title">{getUserTitle(nivel)}</span>
+                    <span className="profile-hero-email">{user?.email || ''}</span>
+                </div>
+                <div className="profile-hero-level">
+                    <span className="profile-hero-level-number">{nivel}</span>
+                    <span className="profile-hero-level-label">nível</span>
+                </div>
             </div>
 
             {/* ─── Seção 1: Dados Principais + Senha (sempre visível) ─── */}
@@ -224,7 +256,7 @@ const AccountSettings = ({ user, onUpdateSuccess }) => {
             <SecaoColapsavel
                 titulo="Atualizar Medidas"
                 icone={Weight}
-                descricao="Peso e % de gordura — atualize mensalmente para precisão no cálculo"
+                descricao="Peso e % de gordura corporal"
                 cor="#60a5fa"
             >
                 {messageMedidas.text && (
@@ -261,7 +293,7 @@ const AccountSettings = ({ user, onUpdateSuccess }) => {
             <SecaoColapsavel
                 titulo="Meu Objetivo"
                 icone={Target}
-                descricao="Alvo metabólico e nível de atividade física — revise trimestralmente"
+                descricao="Alvo metabólico e nível de atividade física"
                 cor="#a78bfa"
             >
                 {messageObjetivo.text && (
@@ -300,8 +332,8 @@ const AccountSettings = ({ user, onUpdateSuccess }) => {
             <SecaoColapsavel
                 titulo="Dados Pessoais"
                 icone={Calendar}
-                descricao="Data de nascimento, sexo e altura — raro alterar"
-                cor="var(--text-secondary)"
+                descricao="Data de nascimento, sexo e altura"
+                cor="#64748b"
             >
                 <div className="settings-form">
                     <div className="form-row-2">

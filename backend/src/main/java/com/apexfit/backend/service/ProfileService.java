@@ -1,6 +1,7 @@
 package com.apexfit.backend.service;
 
 import com.apexfit.backend.dto.BioProfileDTO;
+import com.apexfit.backend.exception.UserNotFoundException;
 import com.apexfit.backend.dto.DashboardDataDTO;
 import com.apexfit.backend.dto.NutritionPlanDTO;
 import com.apexfit.backend.model.User;
@@ -27,18 +28,18 @@ public class ProfileService {
 
         public DashboardDataDTO updateAccountProfile(String email, AccountUpdateDTO accountDto) {
                 User user = userRepository.findByEmail(email)
-                                .orElseThrow(() -> new RuntimeException("User not found"));
+                                .orElseThrow(() -> new UserNotFoundException(email));
 
-                if (accountDto.getName() != null && !accountDto.getName().isBlank()) {
-                        user.setName(accountDto.getName());
+                if (accountDto.name() != null && !accountDto.name().isBlank()) {
+                        user.setName(accountDto.name());
                 }
 
-                if (accountDto.getNewPassword() != null && !accountDto.getNewPassword().isBlank()) {
-                        if (accountDto.getCurrentPassword() == null || !passwordEncoder
-                                        .matches(accountDto.getCurrentPassword(), user.getPassword())) {
+                if (accountDto.newPassword() != null && !accountDto.newPassword().isBlank()) {
+                        if (accountDto.currentPassword() == null || !passwordEncoder
+                                        .matches(accountDto.currentPassword(), user.getPassword())) {
                                 throw new RuntimeException("Senha atual incorreta.");
                         }
-                        user.setPassword(passwordEncoder.encode(accountDto.getNewPassword()));
+                        user.setPassword(passwordEncoder.encode(accountDto.newPassword()));
                 }
 
                 user = userRepository.save(user);
@@ -48,7 +49,7 @@ public class ProfileService {
 
         public DashboardDataDTO updateBioProfile(String email, BioProfileDTO bioDto) {
                 User user = userRepository.findByEmail(email)
-                                .orElseThrow(() -> new RuntimeException("User not found"));
+                                .orElseThrow(() -> new UserNotFoundException(email));
 
                 boolean isFirstTimeSetup = (user.getWeight() == null);
 
@@ -81,7 +82,7 @@ public class ProfileService {
 
         public DashboardDataDTO getDashboardDataByEmail(String email) {
                 User user = userRepository.findByEmail(email)
-                                .orElseThrow(() -> new RuntimeException("User not found"));
+                                .orElseThrow(() -> new UserNotFoundException(email));
 
                 // Process daily activity (Streak + Daily Login XP)
                 user = gamificationService.processDailyActivity(user);
@@ -123,7 +124,7 @@ public class ProfileService {
         // Persiste a dieta aprovada pelo usuario no banco
         public DashboardDataDTO salvarDieta(String email, String dietaPlan) {
                 User user = userRepository.findByEmail(email)
-                                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+                                .orElseThrow(() -> new UserNotFoundException(email));
                 user.setSavedDietPlan(dietaPlan);
                 user = userRepository.save(user);
                 return getDashboardData(user);

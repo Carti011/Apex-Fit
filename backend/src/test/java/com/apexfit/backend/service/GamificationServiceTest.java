@@ -149,8 +149,8 @@ class GamificationServiceTest {
         List<XpHistoryDTO> result = gamificationService.getWeeklyXpHistory("test@email.com");
 
         assertEquals(3, result.size()); // twoDaysAgo, yesterday, today
-        assertEquals(150, result.get(0).getXp());
-        assertEquals(0, result.get(1).getXp());
-        assertEquals(50, result.get(2).getXp());
+        assertEquals(150, result.get(0).xp());
+        assertEquals(0, result.get(1).xp());
+        assertEquals(50, result.get(2).xp());
     }
 }

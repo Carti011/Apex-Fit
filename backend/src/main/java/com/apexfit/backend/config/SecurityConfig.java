@@ -15,6 +15,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import jakarta.servlet.DispatcherType;
 import java.util.List;
 
 @Configuration
@@ -35,6 +36,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(
                         org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // Dispatches assíncronos internos do Tomcat (SSE/streaming) — sem autenticação
+                        .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
                         // Libera preflights CORS e endpoints publicos
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/v1/auth/**", "/api/v1/status").permitAll()

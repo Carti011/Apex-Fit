@@ -57,10 +57,11 @@ describe('NutritionistChat Component', () => {
     });
 
     it('deve enviar uma mensagem e receber resposta do bot', async () => {
-        // Simulando a resposta da API do backend
+        // Simula resposta JSON do endpoint /api/ai/chat (usado por api.chatWithNutritionist)
         global.fetch.mockResolvedValueOnce({
             ok: true,
-            json: async () => ({ resposta: 'Sua dieta foi ajustada. <DIETA_PDF>Plano teste</DIETA_PDF>' })
+            status: 200,
+            json: async () => ({ resposta: 'Sua dieta foi ajustada' })
         });
 
         render(

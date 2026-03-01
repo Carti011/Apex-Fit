@@ -5,7 +5,9 @@
 export const parseDietText = (textoBruto, userName, date) => {
     // 1. Extrair APENAS a dieta contida na tag <DIETA_PDF> (se existir)
     let textoFormatado = textoBruto;
+    let textoPreTag = ''; // conteúdo antes da tag — contém o resumo do protocolo
     if (textoFormatado.includes('<DIETA_PDF>') && textoFormatado.includes('</DIETA_PDF>')) {
+        textoPreTag = textoFormatado.split('<DIETA_PDF>')[0].trim();
         textoFormatado = textoFormatado.split('<DIETA_PDF>')[1].split('</DIETA_PDF>')[0].trim();
     } else {
         // Lógica de fallback para textos antigos (sem a tag)
@@ -26,6 +28,16 @@ export const parseDietText = (textoBruto, userName, date) => {
         meals: [],
         hydration: '',
     };
+
+    // Pré-popular headerLines com o conteúdo antes de <DIETA_PDF> (protocolo, objetivo, macros)
+    if (textoPreTag) {
+        textoPreTag.split('\n').forEach(linha => {
+            const l = linha.trim();
+            if (l && !l.match(/^(---|___|\*\*\*)$/)) {
+                jsonResult.headerLines.push(l);
+            }
+        });
+    }
 
     const linhas = textoFormatado.split('\n');
     let inMealsSection = false;

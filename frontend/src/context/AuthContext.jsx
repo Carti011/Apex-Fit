@@ -22,7 +22,6 @@ export const AuthProvider = ({ children }) => {
 
             const userData = { token, name, email: userEmail };
             localStorage.setItem('user', JSON.stringify(userData));
-            localStorage.setItem('token', token); // Keep token separate if needed for API interceptors, or just use user.token
             setUser(userData);
             return true;
         } catch (error) {
@@ -32,7 +31,6 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = () => {
-        localStorage.removeItem('token');
         localStorage.removeItem('user');
         setUser(null);
     };

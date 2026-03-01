@@ -85,7 +85,7 @@ class GamificationControllerTest {
 
         assertEquals(200, response.getStatusCodeValue());
         assertEquals(2, response.getBody().size());
-        assertEquals(100, response.getBody().get(1).getXp());
+        assertEquals(100, response.getBody().get(1).xp());
         verify(gamificationService, times(1)).getWeeklyXpHistory(email);
     }
 }

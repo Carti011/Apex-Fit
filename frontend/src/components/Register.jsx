@@ -4,7 +4,6 @@ import { useNavigate, Link } from 'react-router-dom';
 
 import { ArrowLeft, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import '../App.css';
-import '../App.css';
 import { api } from '../services/api';
 
 export function Register() {
@@ -45,14 +44,14 @@ export function Register() {
             const { confirmPassword, ...dataToSend } = formData;
             await api.register(dataToSend);
 
-            // Auto-login after successful registration
+            // Auto-login após registro — usa as mesmas credenciais recém-criadas
             await login(formData.email, formData.password);
             setSuccess(true);
 
-            // Short delay to show success message then redirect
+            // Redireciona direto para o dashboard após breve tela de boas-vindas
             setTimeout(() => {
-                navigate('/');
-            }, 2000);
+                navigate('/dashboard');
+            }, 1500);
         } catch (err) {
             setError(err.message);
         } finally {

@@ -2,6 +2,7 @@ package com.apexfit.backend.service;
 
 import com.apexfit.backend.dto.RegisterDTO;
 import com.apexfit.backend.exception.EmailAlreadyExistsException;
+import com.apexfit.backend.exception.UserNotFoundException;
 import com.apexfit.backend.model.User;
 import com.apexfit.backend.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,16 +32,16 @@ public class AuthService {
     }
 
     public User register(RegisterDTO data) {
-        String email = data.getEmail() != null ? data.getEmail().toLowerCase() : null;
+        String email = data.email() != null ? data.email().toLowerCase() : null;
 
         if (userRepository.existsByEmail(email)) {
             throw new EmailAlreadyExistsException("Email já cadastrado");
         }
 
         User newUser = new User(
-                data.getName(),
+                data.name(),
                 email,
-                passwordEncoder.encode(data.getPassword()));
+                passwordEncoder.encode(data.password()));
 
         return userRepository.save(newUser);
     }
@@ -54,7 +55,7 @@ public class AuthService {
         String token = jwtTokenProvider.generateToken(authentication);
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(email));
 
         return new AuthResponseDTO(token, user.getName(), user.getEmail());
     }

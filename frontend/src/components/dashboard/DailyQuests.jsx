@@ -1,15 +1,20 @@
 import { useState } from 'react';
 import { Droplet, Apple, Dumbbell, CheckCircle2 } from 'lucide-react';
 import '../../App.css';
+import { sons } from '../../utils/soundEffects';
 
 const DailyQuests = ({ user, onQuestComplete }) => {
-    // Local loading state to prevent spam clicking
     const [loadingQuest, setLoadingQuest] = useState(null);
+    const [completando, setCompletando] = useState(null);
 
     const checkComplete = async (questType) => {
         setLoadingQuest(questType);
+        setCompletando(questType);
+        sons.missaoConcluida();
         await onQuestComplete(questType);
         setLoadingQuest(null);
+        // Remove a classe de animação após ela terminar
+        setTimeout(() => setCompletando(null), 500);
     };
 
     return (
@@ -21,7 +26,7 @@ const DailyQuests = ({ user, onQuestComplete }) => {
             <div className="quests-grid" style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))' }}>
 
                 {/* Água */}
-                <div className={`quest-card glass ${user?.waterGoalMet ? 'completed' : ''}`} style={{ padding: '1.5rem', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: user?.waterGoalMet ? '1px solid var(--accent-color)' : '' }}>
+                <div className={`quest-card glass ${user?.waterGoalMet ? 'completed' : ''} ${completando === 'WATER' ? 'completando' : ''}`} style={{ padding: '1.5rem', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: user?.waterGoalMet ? '1px solid var(--accent-color)' : '' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <div style={{ background: 'rgba(0, 255, 136, 0.1)', padding: '0.8rem', borderRadius: '12px', color: 'var(--accent-color)' }}>
                             <Droplet size={24} />
@@ -46,7 +51,7 @@ const DailyQuests = ({ user, onQuestComplete }) => {
                 </div>
 
                 {/* Dieta */}
-                <div className={`quest-card glass ${user?.dietGoalMet ? 'completed' : ''}`} style={{ padding: '1.5rem', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: user?.dietGoalMet ? '1px solid var(--accent-color)' : '' }}>
+                <div className={`quest-card glass ${user?.dietGoalMet ? 'completed' : ''} ${completando === 'DIET' ? 'completando' : ''}`} style={{ padding: '1.5rem', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: user?.dietGoalMet ? '1px solid var(--accent-color)' : '' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <div style={{ background: 'rgba(0, 255, 136, 0.1)', padding: '0.8rem', borderRadius: '12px', color: 'var(--accent-color)' }}>
                             <Apple size={24} />
@@ -71,7 +76,7 @@ const DailyQuests = ({ user, onQuestComplete }) => {
                 </div>
 
                 {/* Treino */}
-                <div className={`quest-card glass ${user?.workoutGoalMet ? 'completed' : ''}`} style={{ padding: '1.5rem', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: user?.workoutGoalMet ? '1px solid var(--accent-color)' : '' }}>
+                <div className={`quest-card glass ${user?.workoutGoalMet ? 'completed' : ''} ${completando === 'WORKOUT' ? 'completando' : ''}`} style={{ padding: '1.5rem', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: user?.workoutGoalMet ? '1px solid var(--accent-color)' : '' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <div style={{ background: 'rgba(0, 255, 136, 0.1)', padding: '0.8rem', borderRadius: '12px', color: 'var(--accent-color)' }}>
                             <Dumbbell size={24} />

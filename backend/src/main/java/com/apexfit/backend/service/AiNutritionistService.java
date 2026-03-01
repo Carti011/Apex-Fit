@@ -3,8 +3,10 @@ package com.apexfit.backend.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.apexfit.backend.dto.AiChatMessageDTO;
+import com.apexfit.backend.dto.NutritionPlanDTO;
 import com.apexfit.backend.model.User;
 import com.apexfit.backend.repository.UserRepository;
+import com.apexfit.backend.service.CalculatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,8 +14,15 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.LocalDate;
+import com.apexfit.backend.exception.UserNotFoundException;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -30,14 +39,17 @@ public class AiNutritionistService {
     private String geminiApiKey;
 
     private static final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=";
+    private static final String GEMINI_STREAM_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse&key=";
     private static final String GEMINI_MODEL = "gemini-2.5-flash";
 
     private final UserRepository userRepository;
+    private final CalculatorService calculatorService;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public AiNutritionistService(UserRepository userRepository) {
+    public AiNutritionistService(UserRepository userRepository, CalculatorService calculatorService) {
         this.userRepository = userRepository;
+        this.calculatorService = calculatorService;
         this.restTemplate = new RestTemplate();
     }
 
@@ -45,12 +57,71 @@ public class AiNutritionistService {
     // e a nova mensagem
     public String chat(String emailUsuario, AiChatMessageDTO payload) {
         User usuario = userRepository.findByEmail(emailUsuario)
-                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+                .orElseThrow(() -> new UserNotFoundException(emailUsuario));
 
         String systemPrompt = montarSystemPrompt(usuario);
         String corpoRequisicao = montarCorpoGemini(systemPrompt, payload.historico(), payload.novaMensagem());
 
         return chamarGeminiApi(corpoRequisicao);
+    }
+
+    // Ponto de entrada para streaming SSE: emite chunks de texto conforme o Gemini gera
+    public void chatStream(String emailUsuario, AiChatMessageDTO payload, SseEmitter emitter) {
+        User usuario = userRepository.findByEmail(emailUsuario)
+                .orElseThrow(() -> new UserNotFoundException(emailUsuario));
+
+        String systemPrompt = montarSystemPrompt(usuario);
+        String corpoRequisicao = montarCorpoGemini(systemPrompt, payload.historico(), payload.novaMensagem());
+        chamarGeminiApiStream(corpoRequisicao, emitter);
+    }
+
+    // Chama o endpoint de streaming do Gemini e emite cada chunk via SseEmitter
+    private void chamarGeminiApiStream(String corpoJson, SseEmitter emitter) {
+        String urlFinal = GEMINI_STREAM_URL + geminiApiKey;
+        try {
+            HttpClient httpClient = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(urlFinal))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(corpoJson))
+                    .build();
+
+            HttpResponse<java.util.stream.Stream<String>> response =
+                    httpClient.send(request, HttpResponse.BodyHandlers.ofLines());
+
+            response.body().forEach(line -> {
+                if (!line.startsWith("data: ")) return;
+                String jsonChunk = line.substring(6);
+                try {
+                    JsonNode root = objectMapper.readTree(jsonChunk);
+                    JsonNode parts = root.path("candidates").path(0)
+                            .path("content").path("parts");
+                    if (!parts.isMissingNode() && parts.isArray() && !parts.isEmpty()) {
+                        String textChunk = parts.get(0).path("text").asText("");
+                        if (!textChunk.isEmpty()) {
+                            emitter.send(SseEmitter.event().data(textChunk));
+                        }
+                    }
+                } catch (Exception e) {
+                    // chunk malformado ou cliente desconectou — ignora e continua
+                }
+            });
+
+        } catch (IOException | InterruptedException e) {
+            log.warn("[Gemini Stream] Stream encerrado: {}", e.getMessage());
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+        } finally {
+            // Sempre tenta fechar o emitter de forma limpa,
+            // independente de erro ou de o cliente já ter desconectado
+            try {
+                emitter.send(SseEmitter.event().name("done").data(""));
+                emitter.complete();
+            } catch (Exception ex) {
+                // Cliente já desconectou ou resposta já committed — sem ação necessária
+            }
+        }
     }
 
     // Monta o System Prompt com todo o contexto biologico e preferencias do usuario
@@ -191,43 +262,15 @@ public class AiNutritionistService {
                         dietaAtual);
     }
 
-    // Calcula TMB e GET para incluir no contexto da IA
+    // Calcula TMB e GET via CalculatorService para incluir no contexto da IA
     private String calcularDadosMetabolicos(User usuario) {
-        if (usuario.getWeight() == null || usuario.getHeight() == null ||
-                usuario.getBirthDate() == null || usuario.getGender() == null ||
-                usuario.getActivityLevel() == null) {
+        NutritionPlanDTO plan = calculatorService.calculate(usuario);
+        if (plan == null) {
             return "Dados metabolicos: perfil biologico incompleto.";
         }
-
         int idade = Period.between(usuario.getBirthDate(), LocalDate.now()).getYears();
-        double peso = usuario.getWeight();
-        double altura = usuario.getHeight();
-        double tmb;
-
-        if (usuario.getBodyFatPercentage() != null && usuario.getBodyFatPercentage() > 0) {
-            double massaMagra = peso * (1 - (usuario.getBodyFatPercentage() / 100.0));
-            tmb = 370 + (21.6 * massaMagra);
-        } else {
-            if (usuario.getGender().name().equals("MALE")) {
-                tmb = (10 * peso) + (6.25 * altura) - (5 * idade) + 5;
-            } else {
-                tmb = (10 * peso) + (6.25 * altura) - (5 * idade) - 161;
-            }
-        }
-
-        double get = tmb * usuario.getActivityLevel().getFactor();
-
-        if (usuario.getGoal() != null) {
-            switch (usuario.getGoal()) {
-                case LOSE_WEIGHT -> get -= 500;
-                case GAIN_MUSCLE -> get += 250;
-                default -> {
-                }
-            }
-        }
-
         return "TMB: %d kcal | GET (com objetivo): %d kcal | Peso: %.1f kg | Altura: %.0f cm | Idade: %d anos"
-                .formatted((int) tmb, (int) get, peso, altura, idade);
+                .formatted(plan.tmb(), plan.get(), usuario.getWeight(), usuario.getHeight(), idade);
     }
 
     // Monta o corpo JSON no formato da API do Gemini (contents / parts)
@@ -242,10 +285,14 @@ public class AiNutritionistService {
             corpo.put("system_instruction", systemContentMap);
 
             // 2. Historico e nova mensagem no array "contents"
+            // Limita o histórico às últimas 6 mensagens para reduzir payload e latência
             List<Map<String, Object>> contents = new ArrayList<>();
+            List<Map<String, String>> historicoLimitado = (historico != null && historico.size() > 6)
+                    ? historico.subList(historico.size() - 6, historico.size())
+                    : historico;
 
-            if (historico != null) {
-                for (Map<String, String> msg : historico) {
+            if (historicoLimitado != null) {
+                for (Map<String, String> msg : historicoLimitado) {
                     // Mapeia role (user/model)
                     String role = msg.getOrDefault("role", "user");
                     if ("assistant".equals(role))
@@ -267,6 +314,15 @@ public class AiNutritionistService {
             contents.add(novaMsgMap);
 
             corpo.put("contents", contents);
+
+            // Desativa o "thinking" interno do Gemini 2.5 (reduz latência ~3-5s)
+            // 4000 tokens comporta dietas completas de até 6 refeições com macros detalhados
+            Map<String, Object> generationConfig = new LinkedHashMap<>();
+            generationConfig.put("maxOutputTokens", 4000);
+            Map<String, Object> thinkingConfig = new LinkedHashMap<>();
+            thinkingConfig.put("thinkingBudget", 0);
+            generationConfig.put("thinkingConfig", thinkingConfig);
+            corpo.put("generationConfig", generationConfig);
 
             return objectMapper.writeValueAsString(corpo);
         } catch (Exception e) {

@@ -22,7 +22,7 @@ export function Login() {
 
         try {
             await login(email, password);
-            navigate('/profile'); // Redirect to profile after login
+            navigate('/dashboard');
         } catch (err) {
             setError('Falha no login. Verifique suas credenciais.');
         } finally {

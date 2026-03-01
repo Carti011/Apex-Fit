@@ -10,6 +10,7 @@ const STEPS = [
 
 const OnboardingWizard = ({ onComplete }) => {
     const [step, setStep] = useState(1);
+    const [saving, setSaving] = useState(false);
     const [formData, setFormData] = useState({
         birthDate: '',
         gender: 'MALE',
@@ -22,17 +23,23 @@ const OnboardingWizard = ({ onComplete }) => {
 
     const set = (field, value) => setFormData(prev => ({ ...prev, [field]: value }));
 
-    const handleNext = (e) => {
+    const handleNext = async (e) => {
         e.preventDefault();
-        if (step < 3) setStep(s => s + 1);
-        else {
+        if (step < 3) {
+            setStep(s => s + 1);
+        } else {
             const payload = {
                 ...formData,
                 weight: formData.weight ? parseFloat(formData.weight) : null,
                 height: formData.height ? parseFloat(formData.height) : null,
                 bodyFatPercentage: formData.bodyFatPercentage ? parseFloat(formData.bodyFatPercentage) : null,
             };
-            onComplete(payload);
+            setSaving(true);
+            try {
+                await onComplete(payload);
+            } finally {
+                setSaving(false);
+            }
         }
     };
 
@@ -163,9 +170,11 @@ const OnboardingWizard = ({ onComplete }) => {
                         </div>
                     )}
 
-                    <button type="submit" className="ob-next-btn">
+                    <button type="submit" className="ob-next-btn" disabled={saving}>
                         {step < 3 ? (
                             <>Próximo <ChevronRight size={18} /></>
+                        ) : saving ? (
+                            <>Salvando...</>
                         ) : (
                             <><Save size={18} /> Salvar e Entrar no App</>
                         )}
