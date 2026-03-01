@@ -141,12 +141,31 @@ const AccountSettings = ({ user, onUpdateSuccess }) => {
         } catch { /* silencioso */ }
     };
 
+    const nivel = user?.level || 1;
+    const getUserTitle = (lvl) => {
+        if (lvl >= 100) return '🏆 Lenda do Apex Fit';
+        if (lvl >= 50) return '👑 Elite';
+        if (lvl >= 25) return '🏋️ Atleta Focado';
+        if (lvl >= 10) return '🏃 Amador';
+        return '🌱 Iniciante';
+    };
+
     return (
         <div className="account-settings-container slide-up-fade">
-            <div className="settings-header">
-                <User size={32} className="text-emerald-400" />
-                <h2>Minha Conta</h2>
-                <p>Gerencie suas informações de acesso e dados biológicos.</p>
+            {/* ─── Card de Perfil ─── */}
+            <div className="profile-hero-card">
+                <div className="profile-hero-avatar">
+                    {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                </div>
+                <div className="profile-hero-info">
+                    <h2 className="profile-hero-name">{user?.name || 'Usuário'}</h2>
+                    <span className="profile-hero-title">{getUserTitle(nivel)}</span>
+                    <span className="profile-hero-email">{user?.email || ''}</span>
+                </div>
+                <div className="profile-hero-level">
+                    <span className="profile-hero-level-number">{nivel}</span>
+                    <span className="profile-hero-level-label">nível</span>
+                </div>
             </div>
 
             {/* ─── Seção 1: Dados Principais + Senha (sempre visível) ─── */}

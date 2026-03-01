@@ -11,26 +11,103 @@
     gap: 1rem;
 }
 
-.settings-header {
+/* ── Card de Perfil ── */
+.profile-hero-card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.08) 0%, rgba(59, 130, 246, 0.06) 100%);
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-hero-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-color), #3b82f6, transparent);
+}
+
+.profile-hero-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.25), rgba(59, 130, 246, 0.15));
+    border: 2px solid rgba(0, 255, 136, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    flex-shrink: 0;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.15);
+}
+
+.profile-hero-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+}
+
+.profile-hero-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-hero-title {
+    font-size: 0.85rem;
+    color: var(--accent-color);
+    font-weight: 500;
+}
+
+.profile-hero-email {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-hero-level {
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-align: center;
-    margin-bottom: 1rem;
+    justify-content: center;
+    flex-shrink: 0;
+    background: rgba(0, 255, 136, 0.08);
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    border-radius: 14px;
+    padding: 0.6rem 1rem;
+    min-width: 60px;
 }
 
-.settings-header h2 {
-    font-size: 2rem;
-    font-weight: 700;
-    margin: 0.5rem 0 0.25rem;
-    color: white;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+.profile-hero-level-number {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--accent-color);
+    line-height: 1;
 }
 
-.settings-header p {
+.profile-hero-level-label {
+    font-size: 0.7rem;
     color: var(--text-secondary);
-    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
 }
 
 /* ── Settings Form ── */
@@ -44,8 +121,13 @@
 .settings-section {
     border-radius: 16px;
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.07);
     overflow: hidden;
+    transition: border-color 0.2s;
+}
+
+.settings-section:has(.secao-toggle[aria-expanded="true"]) {
+    border-color: rgba(255, 255, 255, 0.12);
 }
 
 .secao-toggle {
@@ -63,7 +145,12 @@
 }
 
 .secao-toggle:hover {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.secao-toggle svg:last-child {
+    color: var(--text-secondary);
+    flex-shrink: 0;
 }
 
 .secao-toggle-left {
@@ -72,7 +159,6 @@
     gap: 0.85rem;
     text-align: left;
     flex: 1;
-    justify-content: center;
 }
 
 .secao-conteudo {
@@ -286,5 +372,24 @@
     .save-settings-btn {
         align-self: stretch;
         justify-content: center;
+    }
+
+    .profile-hero-card {
+        padding: 1.25rem;
+        gap: 1rem;
+    }
+
+    .profile-hero-avatar {
+        width: 52px;
+        height: 52px;
+        font-size: 1.4rem;
+    }
+
+    .profile-hero-name {
+        font-size: 1.1rem;
+    }
+
+    .profile-hero-level-number {
+        font-size: 1.35rem;
     }
 }
