@@ -140,10 +140,15 @@ const NutritionistChat = ({ dashboardData, onVoltar, onDietaSalva }) => {
         if (!ultimaRespostaIA) return;
         setSalvando(true);
         try {
-            // Salva no banco de dados apenas o que foi gerado dentro das tags <DIETA_PDF>
+            // Salva o resumo do protocolo (pré-tag) + refeições (dentro da tag)
+            // para que o PDF sempre exiba o Protocolo Nutricional mesmo em sessões futuras
             let dietaParaSalvar = ultimaRespostaIA;
             if (dietaParaSalvar.includes('<DIETA_PDF>') && dietaParaSalvar.includes('</DIETA_PDF>')) {
-                dietaParaSalvar = dietaParaSalvar.split('<DIETA_PDF>')[1].split('</DIETA_PDF>')[0].trim();
+                const preTag = dietaParaSalvar.split('<DIETA_PDF>')[0].trim();
+                const inTag  = dietaParaSalvar.split('<DIETA_PDF>')[1].split('</DIETA_PDF>')[0].trim();
+                dietaParaSalvar = preTag
+                    ? `${preTag}\n<DIETA_PDF>\n${inTag}\n</DIETA_PDF>`
+                    : `<DIETA_PDF>\n${inTag}\n</DIETA_PDF>`;
             }
 
             const dadosAtualizados = await api.salvarDieta(user.token, dietaParaSalvar);
