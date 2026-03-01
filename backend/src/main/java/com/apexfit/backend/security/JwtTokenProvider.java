@@ -18,7 +18,7 @@ public class JwtTokenProvider {
 
     private static final Logger log = LoggerFactory.getLogger(JwtTokenProvider.class);
 
-    @Value("${app.jwt.secret:MySuperSecretKeyForApexFitApplicationWhichShouldBeVeryLongAndSecure}")
+    @Value("${app.jwt.secret}")
     private String jwtSecret;
 
     @Value("${app.jwt.expiration-milliseconds:86400000}") // 24h
