@@ -1,0 +1,19 @@
+{
+  "properties": [
+    {
+      "name": "app.jwt.secret",
+      "type": "java.lang.String",
+      "description": "Segredo usado para assinar tokens JWT. Em produção, defina via variável de ambiente JWT_SECRET."
+    },
+    {
+      "name": "app.jwt.expiration-milliseconds",
+      "type": "java.lang.Long",
+      "description": "Tempo de expiração do token JWT em milissegundos. Padrão: 86400000 (24h)."
+    },
+    {
+      "name": "gemini.api.key",
+      "type": "java.lang.String",
+      "description": "Chave da API Google Gemini. Em produção, defina via variável de ambiente GEMINI_API_KEY."
+    }
+  ]
+}
