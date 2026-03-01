@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.apexfit.backend.dto.AuthResponseDTO;
 import com.apexfit.backend.dto.LoginDTO;
 import com.apexfit.backend.dto.RegisterDTO;
+import com.apexfit.backend.exception.UserNotFoundException;
 import com.apexfit.backend.model.User;
 import com.apexfit.backend.repository.UserRepository;
 import com.apexfit.backend.security.JwtTokenProvider;
@@ -56,8 +57,8 @@ public class AuthServiceTest {
 
     @Test
     void shouldRegisterUserSuccessfully() {
-        when(userRepository.existsByEmail(registerDTO.getEmail())).thenReturn(false);
-        when(passwordEncoder.encode(registerDTO.getPassword())).thenReturn("encodedPassword");
+        when(userRepository.existsByEmail(registerDTO.email())).thenReturn(false);
+        when(passwordEncoder.encode(registerDTO.password())).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         User createdUser = authService.register(registerDTO);
@@ -83,7 +84,7 @@ public class AuthServiceTest {
 
     @Test
     void shouldThrowExceptionWhenRegisteringExistingEmail() {
-        when(userRepository.existsByEmail(registerDTO.getEmail())).thenReturn(true);
+        when(userRepository.existsByEmail(registerDTO.email())).thenReturn(true);
 
         RuntimeException exception = org.junit.jupiter.api.Assertions.assertThrows(
                 RuntimeException.class,
@@ -99,10 +100,8 @@ public class AuthServiceTest {
         when(jwtTokenProvider.generateToken(authentication)).thenReturn("jwt-token");
         when(userRepository.findByEmail(loginDTO.email())).thenReturn(Optional.empty());
 
-        RuntimeException exception = org.junit.jupiter.api.Assertions.assertThrows(
-                RuntimeException.class,
+        org.junit.jupiter.api.Assertions.assertThrows(
+                UserNotFoundException.class,
                 () -> authService.login(loginDTO));
-
-        assertEquals("User not found", exception.getMessage());
     }
 }

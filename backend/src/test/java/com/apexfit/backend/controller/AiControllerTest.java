@@ -1,6 +1,7 @@
 package com.apexfit.backend.controller;
 
 import com.apexfit.backend.dto.AiChatMessageDTO;
+import com.apexfit.backend.dto.SaveDietDTO;
 import com.apexfit.backend.dto.DashboardDataDTO;
 import com.apexfit.backend.service.AiNutritionistService;
 import com.apexfit.backend.service.ProfileService;
@@ -77,8 +78,21 @@ class AiControllerTest {
 
         @Test
         @WithMockUser(username = "test@example.com")
+        void chat_ReturnsBadRequest_WhenNovaMensagemIsBlank() throws Exception {
+                AiChatMessageDTO payload = new AiChatMessageDTO(Collections.emptyList(), "");
+
+                mockMvc.perform(post("/api/v1/ai/chat")
+                                .with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(payload)))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.errors.novaMensagem").exists());
+        }
+
+        @Test
+        @WithMockUser(username = "test@example.com")
         void salvarDieta_ReturnsDashboardData_WhenSuccessful() throws Exception {
-                Map<String, String> payload = Map.of("dietaPlan", "Plano salvo com sucesso");
+                SaveDietDTO payload = new SaveDietDTO("Plano salvo com sucesso");
 
                 DashboardDataDTO dashboardData = new DashboardDataDTO(
                                 "Test User", "test@example.com",

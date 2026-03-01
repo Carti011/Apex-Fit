@@ -5,7 +5,10 @@ import com.apexfit.backend.model.User;
 import com.apexfit.backend.model.enums.ActivityLevel;
 import com.apexfit.backend.model.enums.Gender;
 import com.apexfit.backend.model.enums.Goal;
+import com.apexfit.backend.dto.NutritionPlanDTO;
+import com.apexfit.backend.exception.UserNotFoundException;
 import com.apexfit.backend.repository.UserRepository;
+import com.apexfit.backend.service.CalculatorService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +34,9 @@ class AiNutritionistServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private CalculatorService calculatorService;
 
     @Mock
     private RestTemplate restTemplate;
@@ -60,6 +66,8 @@ class AiNutritionistServiceTest {
         user.setActivityLevel(ActivityLevel.MODERATE); // fator 1.55
 
         Mockito.when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        Mockito.when(calculatorService.calculate(any(User.class)))
+                .thenReturn(new NutritionPlanDTO(1600, 2000, 160, 200, 70));
 
         String mockResponseJson = "{\"candidates\":[{\"content\":{\"parts\":[{\"text\":\"Sua dieta está pronta!\"}]}}]}";
         ResponseEntity<String> responseEntity = new ResponseEntity<>(mockResponseJson, HttpStatus.OK);
@@ -83,11 +91,9 @@ class AiNutritionistServiceTest {
         AiChatMessageDTO payload = new AiChatMessageDTO(Collections.emptyList(), "Oi");
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        assertThrows(UserNotFoundException.class, () -> {
             aiNutritionistService.chat("test@example.com", payload);
         });
-
-        assertEquals("Usuario nao encontrado", exception.getMessage());
     }
 
     @Test
