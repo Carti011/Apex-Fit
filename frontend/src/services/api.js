@@ -65,7 +65,8 @@ export const api = {
     },
 
     updateBioProfile: async (token, bioData) => {
-        const response = await fetchWithAuth(`${API_URL}/profile/bio`, {
+        // Usa fetch direto (sem fetchWithAuth) para que o chamador decida como tratar o 401
+        const response = await fetch(`${API_URL}/profile/bio`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -74,8 +75,13 @@ export const api = {
             body: JSON.stringify(bioData),
         });
 
+        if (response.status === 401) {
+            throw new Error('SESSION_EXPIRED');
+        }
+
         if (!response.ok) {
-            throw new Error('Falha ao atualizar perfil');
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Falha ao atualizar perfil');
         }
 
         return response.json();
@@ -148,6 +154,76 @@ export const api = {
         }
 
         return response.json();
+    },
+
+    // Envia mensagem via streaming SSE — onChunk(text), onDone(), onError(msg)
+    chatWithNutritionistStream: (token, historico, novaMensagem, onChunk, onDone, onError) => {
+        fetch(`${API_URL}/ai/chat/stream`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ historico, novaMensagem })
+        }).then(async response => {
+            if (response.status === 401) {
+                localStorage.removeItem('user');
+                window.location.href = '/login';
+                onError?.('Sessão expirada');
+                return;
+            }
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                onError?.(err.message || 'Erro ao se comunicar com a IA');
+                return;
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            // Estado do evento SSE atual — acumula linhas até linha em branco (spec SSE)
+            let eventoTipo = null;
+            let eventoDataLinhas = [];
+
+            const despacharEvento = () => {
+                if (eventoDataLinhas.length === 0 && !eventoTipo) return;
+                // Múltiplas linhas data: do mesmo evento são unidas com \n (preserva quebras)
+                const data = eventoDataLinhas.join('\n');
+                if (eventoTipo === 'done') {
+                    onDone?.();
+                } else if (eventoTipo === 'error') {
+                    onError?.('Erro ao processar resposta da IA');
+                } else if (data) {
+                    onChunk?.(data);
+                }
+                eventoTipo = null;
+                eventoDataLinhas = [];
+            };
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop(); // mantém linha incompleta no buffer
+
+                for (const line of lines) {
+                    if (line === '') {
+                        despacharEvento(); // linha em branco = fim do evento SSE
+                    } else if (line.startsWith('event: ')) {
+                        eventoTipo = line.slice(7).trim();
+                    } else if (line.startsWith('data: ')) {
+                        eventoDataLinhas.push(line.slice(6));
+                    }
+                }
+            }
+            despacharEvento(); // garante último evento sem linha em branco final
+            onDone?.();
+        }).catch(err => {
+            onError?.(err.message || 'Erro ao se comunicar com a IA');
+        });
     },
 
     // Salva a dieta aprovada pelo usuario no banco
