@@ -1,5 +1,15 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
 
+async function fetchWithAuth(url, options = {}) {
+    const response = await fetch(url, options);
+    if (response.status === 401) {
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        throw new Error('Sessão expirada. Faça login novamente.');
+    }
+    return response;
+}
+
 export const api = {
     async register(userData) {
         // Ajuste para o endpoint correto do seu backend
@@ -39,7 +49,7 @@ export const api = {
     },
 
     getDashboard: async (token) => {
-        const response = await fetch(`${API_URL}/profile/dashboard`, {
+        const response = await fetchWithAuth(`${API_URL}/profile/dashboard`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -55,7 +65,7 @@ export const api = {
     },
 
     updateBioProfile: async (token, bioData) => {
-        const response = await fetch(`${API_URL}/profile/bio`, {
+        const response = await fetchWithAuth(`${API_URL}/profile/bio`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -72,7 +82,7 @@ export const api = {
     },
 
     updateAccountProfile: async (token, accountData) => {
-        const response = await fetch(`${API_URL}/profile/account`, {
+        const response = await fetchWithAuth(`${API_URL}/profile/account`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -90,7 +100,7 @@ export const api = {
     },
 
     completeQuest: async (token, questType) => {
-        const response = await fetch(`${API_URL}/gamification/quests/complete?questType=${questType}`, {
+        const response = await fetchWithAuth(`${API_URL}/gamification/quests/complete?questType=${questType}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -106,7 +116,7 @@ export const api = {
     },
 
     getGamificationHistory: async (token) => {
-        const response = await fetch(`${API_URL}/gamification/history`, {
+        const response = await fetchWithAuth(`${API_URL}/gamification/history`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -123,7 +133,7 @@ export const api = {
 
     // Envia uma mensagem para o Agente Nutricionista de IA
     chatWithNutritionist: async (token, historico, novaMensagem) => {
-        const response = await fetch(`${API_URL}/ai/chat`, {
+        const response = await fetchWithAuth(`${API_URL}/ai/chat`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -142,7 +152,7 @@ export const api = {
 
     // Salva a dieta aprovada pelo usuario no banco
     salvarDieta: async (token, dietaPlan) => {
-        const response = await fetch(`${API_URL}/ai/salvar-dieta`, {
+        const response = await fetchWithAuth(`${API_URL}/ai/salvar-dieta`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
