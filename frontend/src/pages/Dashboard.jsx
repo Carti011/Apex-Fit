@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Activity, Target, User, Utensils, LogOut, ShieldCheck, X, ChevronRight } from 'lucide-react';
@@ -9,6 +9,8 @@ import NutritionPlan from '../components/dashboard/NutritionPlan';
 import AccountSettings from '../components/dashboard/AccountSettings';
 import OnboardingWizard from '../components/dashboard/OnboardingWizard';
 import { api } from '../services/api';
+import { useDashboard } from '../hooks/useDashboard';
+import { useToast } from '../hooks/useToast';
 import './Dashboard.css';
 
 const getUserTitle = (level) => {
@@ -23,18 +25,12 @@ const Dashboard = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('dashboard');
-    const [dashboardData, setDashboardData] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [showLevelUp, setShowLevelUp] = useState(false);
     const [showTitlesModal, setShowTitlesModal] = useState(false);
-    const [prevLevel, setPrevLevel] = useState(null);
-    const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
     const [isChatOpen, setIsChatOpen] = useState(false);
 
-    const showToast = (message, type = 'success') => {
-        setToast({ show: true, message, type });
-        setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
-    };
+    const { dashboardData, setDashboardData, loading, prevLevel, setPrevLevel } = useDashboard(user);
+    const { toast, showToast } = useToast();
 
     // Merge Auth user with fresh DashboardData
     const activeData = { ...user, ...dashboardData };
@@ -47,23 +43,6 @@ const Dashboard = () => {
     const base = targetXp - gap;
     const progressInLevel = Math.max(0, currentXp - base);
     const percent = Math.min(100, (progressInLevel / gap) * 100);
-
-    useEffect(() => {
-        const fetchDashboardInfo = async () => {
-            if (!user || !user.token) return;
-            try {
-                const data = await api.getDashboard(user.token);
-                setDashboardData(data);
-                if (data.level) setPrevLevel(data.level);
-            } catch (error) {
-                console.error("Erro ao carregar dashboard", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchDashboardInfo();
-    }, [user]);
 
     const handleLogout = () => {
         logout();
