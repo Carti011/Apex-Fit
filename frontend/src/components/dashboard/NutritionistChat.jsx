@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
-import { Send, Bot, User, Sparkles, Download, Save, ArrowLeft, ClipboardList } from 'lucide-react';
+import { Send, Bot, User, Sparkles, Download, Save, ArrowLeft } from 'lucide-react';
 import { gerarPdfDieta } from '../../services/pdfBuilder';
 
 // Renderiza texto inline com **negrito** e glow suave
@@ -23,7 +23,7 @@ const FormatarMensagem = ({ texto }) => {
     const textoLimpo = texto.replace(/<\/?DIETA_PDF>/g, '');
     const linhas = textoLimpo.split('\n');
     return (
-        <div className="mensagem-conteudo" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', padding: '20px 22px' }}>
+        <div className="mensagem-conteudo" style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
             {linhas.map((linha, i) => {
                 // --- separador: linha visual elegante
                 if (linha.trim() === '---' || linha.trim() === '___' || linha.trim() === '***') {
@@ -115,7 +115,7 @@ const NutritionistChat = ({ dashboardData, onVoltar, onDietaSalva }) => {
         const textoUsuario = inputMsg.trim();
         setInputMsg('');
 
-        // Historico sem a mensagem inicial (eh o system prompt)
+        // Historico sem a mensagem inicial (greeting local, nao vai para API)
         const historicoParaApi = mensagens.slice(1).map(m => ({ role: m.role, text: m.text }));
 
         setMensagens(prev => [...prev, { role: 'user', text: textoUsuario }]);
@@ -123,11 +123,10 @@ const NutritionistChat = ({ dashboardData, onVoltar, onDietaSalva }) => {
         setDietaSalva(false);
 
         try {
-            const resposta = await api.chatWithNutritionist(user.token, historicoParaApi, textoUsuario);
-            const textoResposta = resposta.resposta;
-            setMensagens(prev => [...prev, { role: 'model', text: textoResposta }]);
-            setUltimaRespostaIA(textoResposta);
-        } catch (error) {
+            const data = await api.chatWithNutritionist(user.token, historicoParaApi, textoUsuario);
+            setMensagens(prev => [...prev, { role: 'model', text: data.resposta }]);
+            setUltimaRespostaIA(data.resposta);
+        } catch {
             setMensagens(prev => [...prev, {
                 role: 'model',
                 text: '⚠️ Tive um problema técnico agora. Pode tentar de novo em alguns segundos?'

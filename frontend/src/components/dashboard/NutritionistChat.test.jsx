@@ -56,12 +56,19 @@ describe('NutritionistChat Component', () => {
         // O texto de boas vindas inicial será diferente quando não houver mock
     });
 
-    it('deve enviar uma mensagem e receber resposta do bot', async () => {
-        // Simulando a resposta da API do backend
-        global.fetch.mockResolvedValueOnce({
-            ok: true,
-            json: async () => ({ resposta: 'Sua dieta foi ajustada. <DIETA_PDF>Plano teste</DIETA_PDF>' })
+    it('deve enviar uma mensagem e receber resposta do bot via streaming', async () => {
+        // Simula a resposta SSE do endpoint /chat/stream
+        const encoder = new TextEncoder();
+        const mockStream = new ReadableStream({
+            start(controller) {
+                controller.enqueue(encoder.encode('data: Sua dieta foi ajustada\n'));
+                controller.enqueue(encoder.encode('\n'));
+                controller.enqueue(encoder.encode('event: done\n'));
+                controller.enqueue(encoder.encode('data: \n\n'));
+                controller.close();
+            }
         });
+        global.fetch.mockResolvedValueOnce({ ok: true, status: 200, body: mockStream });
 
         render(
             <AuthContext.Provider value={mockAuthContext}>
