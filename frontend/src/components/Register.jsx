@@ -4,7 +4,6 @@ import { useNavigate, Link } from 'react-router-dom';
 
 import { ArrowLeft, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import '../App.css';
-import '../App.css';
 import { api } from '../services/api';
 
 export function Register() {
